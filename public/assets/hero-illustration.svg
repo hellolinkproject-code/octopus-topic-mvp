@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 500" role="img" aria-labelledby="title desc">
+  <title id="title">옥토퍼스 토픽 AI 튜터와 함께하는 성장 학습</title>
+  <desc id="desc">연필과 첨삭지를 든 안경 쓴 문어 튜터가 오늘의 미션, 성장 포인트, 정밀 첨삭을 연결하는 모습</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F2FF"/>
+      <stop offset=".55" stop-color="#F1EAFE"/>
+      <stop offset="1" stop-color="#E9FBF7"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C40DB"/>
+      <stop offset="1" stop-color="#5A2FB3"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#111827" flood-opacity=".10"/>
+    </filter>
+  </defs>
+  <rect x="12" y="12" width="596" height="476" rx="38" fill="url(#bg)"/>
+  <circle cx="310" cy="238" r="146" fill="#fff" opacity=".55"/>
+  <path d="M66 106c22-30 59-34 84-9" fill="none" stroke="#D9C6FB" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <circle cx="78" cy="92" r="7" fill="#6EE7C8"/>
+  <path d="M514 88l5 12 12 5-12 5-5 12-5-12-12-5 12-5z" fill="#A678F6" opacity=".62"/>
+  <path d="M216 239h-50" stroke="#A678F6" stroke-width="7" stroke-linecap="round"/>
+  <path d="M454 239h-50" stroke="#6EE7C8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M199 225l17 14-17 14" fill="none" stroke="#A678F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M437 225l17 14-17 14" fill="none" stroke="#6EE7C8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <g filter="url(#shadow)">
+    <rect x="60" y="108" width="128" height="256" rx="26" fill="#fff"/>
+    <rect x="74" y="130" width="100" height="196" rx="14" fill="#FAFAFB"/>
+    <rect x="88" y="149" width="50" height="7" rx="3.5" fill="#7C40DB"/>
+    <rect x="88" y="165" width="72" height="8" rx="4" fill="#D9C6FB"/>
+    <rect x="88" y="186" width="72" height="48" rx="12" fill="#F1EAFE"/>
+    <circle cx="108" cy="210" r="10" fill="#7C40DB"/>
+    <rect x="124" y="201" width="26" height="7" rx="3.5" fill="#A678F6"/>
+    <rect x="124" y="214" width="20" height="7" rx="3.5" fill="#D9C6FB"/>
+    <rect x="88" y="247" width="72" height="48" rx="12" fill="#E9FBF7"/>
+    <path d="M102 275l12-12 10 8 22-22" fill="none" stroke="#2CC7A0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="124" cy="344" r="7" fill="#D1D5DB"/>
+  </g>
+  <g>
+    <path d="M266 289c-29 25-18 61 12 48" fill="none" stroke="#5A2FB3" stroke-width="22" stroke-linecap="round"/>
+    <path d="M294 300c-15 39 25 54 35 18" fill="none" stroke="#5A2FB3" stroke-width="22" stroke-linecap="round"/>
+    <path d="M323 300c3 40 47 39 44 3" fill="none" stroke="#5A2FB3" stroke-width="22" stroke-linecap="round"/>
+    <path d="M348 287c28 25 51 1 37-24" fill="none" stroke="#5A2FB3" stroke-width="22" stroke-linecap="round"/>
+    <ellipse cx="310" cy="233" rx="69" ry="75" fill="url(#purple)"/>
+    <circle cx="286" cy="224" r="18" fill="none" stroke="#fff" stroke-width="6"/>
+    <circle cx="334" cy="224" r="18" fill="none" stroke="#fff" stroke-width="6"/>
+    <path d="M304 224h12" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="286" cy="224" r="5.5" fill="#fff"/>
+    <circle cx="334" cy="224" r="5.5" fill="#fff"/>
+    <path d="M297 257c8 9 19 9 27 0" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <g transform="rotate(-8 250 260)">
+      <path d="M245 219h12v69h-12z" fill="#7C40DB"/>
+      <path d="M245 219l6-14 6 14z" fill="#FFB38A"/>
+      <path d="M249 210l2-5 3 6z" fill="#374151"/>
+      <rect x="245" y="244" width="12" height="10" fill="#A678F6"/>
+    </g>
+    <g transform="rotate(8 374 251)">
+      <path d="M354 213h43l12 12v62h-55z" fill="#fff" stroke="#D9C6FB" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M397 213v13h12" fill="none" stroke="#D9C6FB" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M367 241l7 7 14-16" fill="none" stroke="#7C40DB" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M367 261h27M367 274h20" stroke="#A678F6" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <circle cx="278" cy="326" r="4" fill="#A678F6"/>
+    <circle cx="330" cy="334" r="4" fill="#A678F6"/>
+    <circle cx="361" cy="315" r="4" fill="#A678F6"/>
+    <circle cx="385" cy="328" r="38" fill="#fff" stroke="#D9C6FB" stroke-width="4"/>
+    <text x="385" y="322" text-anchor="middle" font-family="Inter, Arial" font-size="22" font-weight="800" fill="#5A2FB3">+50</text>
+    <text x="385" y="344" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="12" font-weight="700" fill="#2CC7A0">POINT</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="432" y="142" width="130" height="206" rx="18" fill="#374151"/>
+    <rect x="448" y="158" width="98" height="160" rx="8" fill="#fff"/>
+    <rect x="463" y="177" width="48" height="7" rx="3.5" fill="#7C40DB"/>
+    <rect x="463" y="190" width="68" height="6" rx="3" fill="#D9C6FB"/>
+    <rect x="463" y="202" width="68" height="54" rx="10" fill="#F8F7FD"/>
+    <rect x="474" y="214" width="46" height="6" rx="3" fill="#7C40DB"/>
+    <rect x="474" y="229" width="38" height="6" rx="3" fill="#A678F6"/>
+    <rect x="463" y="271" width="68" height="28" rx="8" fill="#E9FBF7"/>
+    <path d="M478 285l8 8 18-20" fill="none" stroke="#2CC7A0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M412 348h170l25 28H387z" fill="#1F2937"/>
+  </g>
+  <rect x="69" y="389" width="111" height="35" rx="17.5" fill="#fff" stroke="#D9C6FB"/>
+  <rect x="252" y="389" width="116" height="35" rx="17.5" fill="#fff" stroke="#D9C6FB"/>
+  <rect x="435" y="389" width="124" height="35" rx="17.5" fill="#fff" stroke="#D9C6FB"/>
+</svg>

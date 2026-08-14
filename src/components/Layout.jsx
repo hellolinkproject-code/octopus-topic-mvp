@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { Button } from './ui'
-export function Brand(){return <Link to="/" className="brand" aria-label="옥토퍼스 토픽 홈"><span className="logo-mark">O</span><span>옥토퍼스 <b>토픽</b></span></Link>}
+export function Brand(){return <Link to="/" className="brand" aria-label="옥토퍼스 토픽 홈"><img src="/assets/octopus-logo.svg" alt="옥토퍼스 토픽"/></Link>}
 export default function Layout({children,simple=false}){
  const {user,points,logout}=useApp();const [menuOpen,setMenuOpen]=useState(false);const navigate=useNavigate()
  const handleLogout=()=>{logout();setMenuOpen(false);navigate('/')}

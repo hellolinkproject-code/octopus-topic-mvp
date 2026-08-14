@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 88" role="img" aria-labelledby="title desc">
+  <title id="title">옥토퍼스 토픽 로고</title>
+  <desc id="desc">연필과 첨삭지를 든 안경 쓴 보라색 문어와 옥토퍼스 토픽 글자</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C40DB"/>
+      <stop offset=".56" stop-color="#6430C8"/>
+      <stop offset="1" stop-color="#5A2FB3"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(2 4)">
+    <path d="M21 53C8 55 6 42 15 36" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M20 38l-3-18 4-8 6 6-1 20" fill="#7C40DB"/>
+    <path d="M17 20l4-8 6 6-5 4z" fill="#FFB38A"/>
+    <path d="M21 12l2-4 4 10z" fill="#374151"/>
+    <path d="M31 51c-7 15 8 23 14 9" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M49 53c-2 15 15 17 16 2" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M64 48c10 12 24 4 19-8" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+    <ellipse cx="49" cy="31" rx="28" ry="29" fill="url(#g)"/>
+    <circle cx="40" cy="29" r="9" fill="none" stroke="#fff" stroke-width="3.4"/>
+    <circle cx="59" cy="29" r="9" fill="none" stroke="#fff" stroke-width="3.4"/>
+    <path d="M49 29h2" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+    <circle cx="40" cy="29" r="2.6" fill="#fff"/>
+    <circle cx="59" cy="29" r="2.6" fill="#fff"/>
+    <path d="M43 41c4 4 9 4 13 0" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
+    <g transform="rotate(8 77 29)">
+      <path d="M69 17h15l4 5v22H69z" fill="#fff" stroke="#D9C6FB" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M84 17v6h5" fill="none" stroke="#D9C6FB" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M74 29l3 3 6-7" fill="none" stroke="#7C40DB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M74 37h9" stroke="#A678F6" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+    <circle cx="35" cy="62" r="2" fill="#A678F6"/>
+    <circle cx="57" cy="66" r="2" fill="#A678F6"/>
+    <circle cx="72" cy="56" r="2" fill="#A678F6"/>
+  </g>
+  <text x="105" y="42" font-family="Pretendard, Noto Sans KR, sans-serif" font-size="31" font-weight="850" letter-spacing="-1.4" fill="#111827">옥토퍼스 토픽</text>
+  <text x="107" y="65" font-family="Inter, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="4.2" fill="#7C40DB">TOPIK Writing Feedback</text>
+</svg>
