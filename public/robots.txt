@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://octopus-topic-mvp.vercel.app/sitemap.xml
