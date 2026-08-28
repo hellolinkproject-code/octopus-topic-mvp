@@ -3,6 +3,14 @@ const joinValues = (prompt, seriesKey) => prompt.chartData
   .join(', ')
 
 export function getWritingFeedback(prompt) {
+  if(prompt.number===54)return {
+    outline:prompt.outline,
+    points:[
+      '세 가지 과제를 빠짐없이 다루고 주제와 직접 관련된 내용으로 구성해야 한다.',
+      '도입·근거·해결 방안·결론의 역할을 분명히 하고 연결 표현을 활용해야 한다.',
+      '구어적인 표현을 피하고 격식에 맞는 문법과 어휘를 정확하게 사용해야 한다.',
+    ],
+  }
   const [firstSeries, secondSeries] = prompt.series
   const comparisons = prompt.chartData.map(group => {
     const first = group.values.find(item => item.series === firstSeries.key).value

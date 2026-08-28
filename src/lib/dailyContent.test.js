@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { quizQuestionBank, writingPromptBank } from '../data/mockData'
+import { essayPromptBank, quizQuestionBank, writingPromptBank } from '../data/mockData'
 import { getDailyQuiz, getDailyWritingPrompt, getLocalDateKey } from './dailyContent'
 
 describe('daily problem bank selection', () => {
@@ -48,5 +48,16 @@ describe('daily problem bank selection', () => {
     expect(today.minCharacters).toBe(200)
     expect(today.maxCharacters).toBe(300)
     expect(writingPromptBank).toHaveLength(12)
+  })
+
+  it('rotates original 54 prompts in the official long-form format',()=>{
+    const today=getDailyWritingPrompt(54,new Date(2026,7,27))
+    const tomorrow=getDailyWritingPrompt(54,new Date(2026,7,28))
+    expect(today.number).toBe(54)
+    expect(today.minCharacters).toBe(600)
+    expect(today.maxCharacters).toBe(700)
+    expect(today.questions).toHaveLength(3)
+    expect(tomorrow.id).not.toBe(today.id)
+    expect(essayPromptBank).toHaveLength(6)
   })
 })

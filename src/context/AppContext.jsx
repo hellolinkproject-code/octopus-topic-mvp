@@ -10,7 +10,7 @@ export function AppProvider({children}) {
     login:(email,name)=>setState(c=>({...c,user:{email,name:name||email.split('@')[0],joinedAt:new Date().toISOString()}})),
     logout:()=>setState(c=>({...c,user:null})),
     completeQuiz:(id,result)=>setState(c=>awardQuiz(c,id,result)),
-    saveAnswer:answer=>{const saved={...answer,id:crypto.randomUUID(),createdAt:new Date().toISOString()};setState(c=>({...c,points:c.points+30,answers:[saved,...c.answers]}));return saved},
+    saveAnswer:answer=>{const earnedPoints=answer.promptNumber===54?50:30;const saved={...answer,earnedPoints,id:crypto.randomUUID(),createdAt:new Date().toISOString()};setState(c=>({...c,points:c.points+earnedPoints,answers:[saved,...c.answers]}));return saved},
   }),[])
   return <AppContext.Provider value={{...state,...actions,isInitializing}}>{children}</AppContext.Provider>
 }

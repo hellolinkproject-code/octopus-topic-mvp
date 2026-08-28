@@ -1,4 +1,4 @@
-import { quizQuestionBank, writingPromptBank } from '../data/mockData'
+import { essayPromptBank, quizQuestionBank, writingPromptBank } from '../data/mockData'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -29,12 +29,15 @@ export function getDailyQuiz(date = new Date()) {
   }
 }
 
-export function getDailyWritingPrompt(date = new Date()) {
+export function getDailyWritingPrompt(questionNumberOrDate = 53, selectedDate = new Date()) {
+  const questionNumber = questionNumberOrDate instanceof Date ? 53 : Number(questionNumberOrDate)
+  const date = questionNumberOrDate instanceof Date ? questionNumberOrDate : selectedDate
   const dateKey = getLocalDateKey(date)
-  const prompt = writingPromptBank[getDayNumber(date) % writingPromptBank.length]
+  const bank = questionNumber===54 ? essayPromptBank : writingPromptBank
+  const prompt = bank[getDayNumber(date) % bank.length]
   return {
     ...prompt,
     dateKey,
-    dailyId: `writing-53-${dateKey}-${prompt.id}`,
+    dailyId: `writing-${prompt.number}-${dateKey}-${prompt.id}`,
   }
 }

@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest'
-import { writingPromptBank } from '../data/mockData'
+import { essayPromptBank, writingPromptBank } from '../data/mockData'
 import { getWritingFeedback } from './writingFeedback'
 
 describe('getWritingFeedback',()=>{
@@ -14,5 +14,12 @@ describe('getWritingFeedback',()=>{
     const feedback=getWritingFeedback(writingPromptBank[0])
     expect(feedback.points[0]).toContain('20대')
     expect(feedback.points[1]).toContain('60대')
+  })
+
+  it('54번에는 공식 평가 영역에 맞춘 구성 가이드를 제공한다',()=>{
+    const feedback=getWritingFeedback(essayPromptBank[0])
+    expect(feedback.outline).toHaveLength(3)
+    expect(feedback.points).toHaveLength(3)
+    expect(feedback.modelAnswer).toBeUndefined()
   })
 })
