@@ -1,7 +1,93 @@
-import { ArrowLeft,Eye,EyeOff,ShieldCheck } from 'lucide-react';import { useState } from 'react';import { Link,Navigate,useLocation,useNavigate } from 'react-router-dom';import Layout from '../components/Layout';import { Button,Card,Input } from '../components/ui';import { useApp } from '../context/AppContext'
+import { ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { useState } from 'react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import Layout from '../components/Layout'
+import { Button, Card, Input } from '../components/ui'
+import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
-export default function LoginPage(){const {user,login}=useApp();const {t,path}=useLanguage();const navigate=useNavigate();const location=useLocation();const [form,setForm]=useState({email:'',password:''});const [errors,setErrors]=useState({});const [loading,setLoading]=useState(false);const [showPassword,setShowPassword]=useState(false)
- if(user)return <Navigate to={path('/dashboard')} replace/>
- const submit=e=>{e.preventDefault();const next={};if(!/^\S+@\S+\.\S+$/.test(form.email))next.email=t('login.emailError');if(form.password.length<4)next.password=t('login.passwordError');setErrors(next);if(Object.keys(next).length)return;setLoading(true);setTimeout(()=>{login(form.email,form.email.split('@')[0]);navigate(location.state?.from||path('/dashboard'),{replace:true})},650)}
- return <Layout simple><main className="auth-page"><div className="auth-aside"><div className="eyebrow light"><ShieldCheck size={16}/> {t('login.secure')}</div><h1 className="preserve-lines">{t('login.headline')}</h1><p>{t('login.subtitle')}</p><img className="auth-mascot" src="/assets/mascot-habit.png" alt={t('login.alt')}/><div className="quote-card"><span className="preserve-lines quote-text">{t('login.quote')}</span><span>{t('login.quoteBy')}</span></div></div><Card className="auth-card"><Link to={path('/')} className="back-link"><ArrowLeft size={16}/> {t('login.home')}</Link><span className="auth-kicker">WELCOME BACK</span><h2>{t('login.title')}</h2><p>{t('login.intro')}</p><form onSubmit={submit} noValidate><Input label={t('login.email')} type="email" placeholder="hello@example.com" autoComplete="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} error={errors.email}/><div className="password-field"><Input label={t('login.password')} type={showPassword?'text':'password'} placeholder={t('login.passwordPlaceholder')} autoComplete="current-password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} error={errors.password}/><button type="button" onClick={()=>setShowPassword(v=>!v)} aria-label={t('login.toggle')}>{showPassword?<EyeOff/>:<Eye/>}</button></div><Button type="submit" size="lg" loading={loading}>{t('login.submit')}</Button></form><div className="demo-note"><b>{t('login.demo')}</b><span>{t('login.demoText')}</span></div></Card></main></Layout>
+export default function LoginPage() {
+  const { user, login } = useApp()
+  const { t, path } = useLanguage()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [form, setForm] = useState({ email: '', password: '' })
+  const [errors, setErrors] = useState({})
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  if (user) return <Navigate to={path('/dashboard')} replace />
+  const submit = (e) => {
+    e.preventDefault()
+    const next = {}
+    if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = t('login.emailError')
+    if (form.password.length < 4) next.password = t('login.passwordError')
+    setErrors(next)
+    if (Object.keys(next).length) return
+    setLoading(true)
+    setTimeout(() => {
+      login(form.email, form.email.split('@')[0])
+      navigate(location.state?.from || path('/dashboard'), { replace: true })
+    }, 650)
+  }
+  return (
+    <Layout simple>
+      <main className="auth-page">
+        <div className="auth-aside">
+          <div className="eyebrow light">
+            <ShieldCheck size={16} /> {t('login.secure')}
+          </div>
+          <h1 className="preserve-lines">{t('login.headline')}</h1>
+          <p>{t('login.subtitle')}</p>
+          <img className="auth-mascot" src="/assets/mascot-habit.png" alt={t('login.alt')} />
+          <div className="quote-card">
+            <span className="preserve-lines quote-text">{t('login.quote')}</span>
+            <span>{t('login.quoteBy')}</span>
+          </div>
+        </div>
+        <Card className="auth-card">
+          <Link to={path('/')} className="back-link">
+            <ArrowLeft size={16} /> {t('login.home')}
+          </Link>
+          <span className="auth-kicker">WELCOME BACK</span>
+          <h2>{t('login.title')}</h2>
+          <p>{t('login.intro')}</p>
+          <form onSubmit={submit} noValidate>
+            <Input
+              label={t('login.email')}
+              type="email"
+              placeholder="hello@example.com"
+              autoComplete="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              error={errors.email}
+            />
+            <div className="password-field">
+              <Input
+                label={t('login.password')}
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t('login.passwordPlaceholder')}
+                autoComplete="current-password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                error={errors.password}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={t('login.toggle')}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
+            <Button type="submit" size="lg" loading={loading}>
+              {t('login.submit')}
+            </Button>
+          </form>
+          <div className="demo-note">
+            <b>{t('login.demo')}</b>
+            <span>{t('login.demoText')}</span>
+          </div>
+        </Card>
+      </main>
+    </Layout>
+  )
 }

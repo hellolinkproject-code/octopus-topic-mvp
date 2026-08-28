@@ -1,4 +1,5 @@
 import { essayPromptBank, quizQuestionBank, writingPromptBank } from '../data/mockData'
+import { getWritingTaskNumber, isEssayTask, WRITING_TASK } from './writingTask'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -29,11 +30,17 @@ export function getDailyQuiz(date = new Date()) {
   }
 }
 
-export function getDailyWritingPrompt(questionNumberOrDate = 53, selectedDate = new Date()) {
-  const questionNumber = questionNumberOrDate instanceof Date ? 53 : Number(questionNumberOrDate)
+export function getDailyWritingPrompt(
+  questionNumberOrDate = WRITING_TASK.GRAPH,
+  selectedDate = new Date(),
+) {
+  const questionNumber =
+    questionNumberOrDate instanceof Date
+      ? WRITING_TASK.GRAPH
+      : getWritingTaskNumber(questionNumberOrDate)
   const date = questionNumberOrDate instanceof Date ? questionNumberOrDate : selectedDate
   const dateKey = getLocalDateKey(date)
-  const bank = questionNumber===54 ? essayPromptBank : writingPromptBank
+  const bank = isEssayTask(questionNumber) ? essayPromptBank : writingPromptBank
   const prompt = bank[getDayNumber(date) % bank.length]
   return {
     ...prompt,

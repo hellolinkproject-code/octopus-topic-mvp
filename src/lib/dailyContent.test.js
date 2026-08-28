@@ -14,12 +14,14 @@ describe('daily problem bank selection', () => {
 
     expect(evening).toEqual(morning)
     expect(tomorrow.id).not.toBe(morning.id)
-    expect(tomorrow.questions.map(item => item.id)).not.toEqual(morning.questions.map(item => item.id))
+    expect(tomorrow.questions.map((item) => item.id)).not.toEqual(
+      morning.questions.map((item) => item.id),
+    )
   })
 
   it('selects one valid question from each TOPIK-style pool', () => {
     const quiz = getDailyQuiz(new Date(2026, 7, 27))
-    const idsByPool = Object.values(quizQuestionBank).map(pool => pool.map(item => item.id))
+    const idsByPool = Object.values(quizQuestionBank).map((pool) => pool.map((item) => item.id))
 
     expect(quiz.questions).toHaveLength(idsByPool.length)
     quiz.questions.forEach((item, index) => expect(idsByPool[index]).toContain(item.id))
@@ -27,10 +29,10 @@ describe('daily problem bank selection', () => {
 
   it('keeps every bank item valid and uniquely identifiable', () => {
     const questions = Object.values(quizQuestionBank).flat()
-    const ids = questions.map(item => item.id)
+    const ids = questions.map((item) => item.id)
 
     expect(new Set(ids).size).toBe(ids.length)
-    questions.forEach(item => {
+    questions.forEach((item) => {
       expect(item.options).toHaveLength(4)
       expect(item.answer).toBeGreaterThanOrEqual(0)
       expect(item.answer).toBeLessThan(4)
@@ -50,9 +52,9 @@ describe('daily problem bank selection', () => {
     expect(writingPromptBank).toHaveLength(12)
   })
 
-  it('rotates original 54 prompts in the official long-form format',()=>{
-    const today=getDailyWritingPrompt(54,new Date(2026,7,27))
-    const tomorrow=getDailyWritingPrompt(54,new Date(2026,7,28))
+  it('rotates original 54 prompts in the official long-form format', () => {
+    const today = getDailyWritingPrompt(54, new Date(2026, 7, 27))
+    const tomorrow = getDailyWritingPrompt(54, new Date(2026, 7, 28))
     expect(today.number).toBe(54)
     expect(today.minCharacters).toBe(600)
     expect(today.maxCharacters).toBe(700)

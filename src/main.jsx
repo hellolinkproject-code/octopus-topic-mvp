@@ -7,5 +7,13 @@ import { LanguageProvider } from './i18n/LanguageContext'
 import './styles.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode><BrowserRouter><LanguageProvider><AppProvider><App /></AppProvider></LanguageProvider></BrowserRouter></React.StrictMode>,
+  <React.StrictMode>
+    <BrowserRouter>
+      <LanguageProvider>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </LanguageProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
 )
