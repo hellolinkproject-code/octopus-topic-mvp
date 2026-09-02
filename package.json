@@ -9,16 +9,19 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write \"src/**/*.{js,jsx}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx}\""
+    "format": "prettier --write \"{src,api}/**/*.{js,jsx}\"",
+    "format:check": "prettier --check \"{src,api}/**/*.{js,jsx}\""
   },
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "@vitejs/plugin-react": "latest",
+    "jose": "^6.2.10",
     "lucide-react": "latest",
-    "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest"
+    "react-router-dom": "latest",
+    "vite": "latest",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "prettier": "3.6.2",

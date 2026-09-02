@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   if (user) return <Navigate to={path('/dashboard')} replace />
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     const next = {}
     if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = t('login.emailError')
@@ -23,10 +23,14 @@ export default function LoginPage() {
     setErrors(next)
     if (Object.keys(next).length) return
     setLoading(true)
-    setTimeout(() => {
-      login(form.email, form.email.split('@')[0])
+    try {
+      await login(form.email, form.password)
       navigate(location.state?.from || path('/dashboard'), { replace: true })
-    }, 650)
+    } catch (error) {
+      setErrors({ form: error.message })
+    } finally {
+      setLoading(false)
+    }
   }
   return (
     <Layout simple>
@@ -81,6 +85,11 @@ export default function LoginPage() {
             <Button type="submit" size="lg" loading={loading}>
               {t('login.submit')}
             </Button>
+            {errors.form ? (
+              <p className="inline-error" role="alert">
+                {errors.form}
+              </p>
+            ) : null}
           </form>
           <div className="demo-note">
             <b>{t('login.demo')}</b>

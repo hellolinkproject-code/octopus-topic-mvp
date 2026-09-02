@@ -1,40 +1,59 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { initialState, loadState, saveState } from '../lib/storage'
-import { awardQuiz } from '../lib/progress'
-import { getWritingReward } from '../lib/writingTask'
+import {
+  clearAccessToken,
+  completeQuizRequest,
+  fetchMyState,
+  hasAccessToken,
+  loginRequest,
+  saveAnswerRequest,
+} from '../lib/api'
+import { initialState } from '../lib/storage'
 const AppContext = createContext(null)
 export function AppProvider({ children }) {
   const [state, setState] = useState(initialState)
   const [isInitializing, setIsInitializing] = useState(true)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setState(loadState())
-      setIsInitializing(false)
-    }, 420)
-    return () => clearTimeout(timer)
+    let active = true
+    const initialize = async () => {
+      if (!hasAccessToken()) {
+        if (active) setIsInitializing(false)
+        return
+      }
+      try {
+        const nextState = await fetchMyState()
+        if (active) setState(nextState)
+      } catch {
+        clearAccessToken()
+        if (active) setState(initialState)
+      } finally {
+        if (active) setIsInitializing(false)
+      }
+    }
+    void initialize()
+    return () => {
+      active = false
+    }
   }, [])
-  useEffect(() => {
-    if (!isInitializing) saveState(state)
-  }, [state, isInitializing])
   const actions = useMemo(
     () => ({
-      login: (email, name) =>
-        setState((c) => ({
-          ...c,
-          user: { email, name: name || email.split('@')[0], joinedAt: new Date().toISOString() },
-        })),
-      logout: () => setState((c) => ({ ...c, user: null })),
-      completeQuiz: (id, result) => setState((c) => awardQuiz(c, id, result)),
-      saveAnswer: (answer) => {
-        const earnedPoints = getWritingReward(answer.promptNumber)
-        const saved = {
-          ...answer,
-          earnedPoints,
-          id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-        }
-        setState((c) => ({ ...c, points: c.points + earnedPoints, answers: [saved, ...c.answers] }))
-        return saved
+      login: async (email, password) => {
+        const nextState = await loginRequest(email, password)
+        setState(nextState)
+        return nextState.user
+      },
+      logout: () => {
+        clearAccessToken()
+        setState(initialState)
+      },
+      completeQuiz: async (id, result) => {
+        const nextState = await completeQuizRequest(id, result)
+        setState(nextState)
+        return nextState.latestQuizResult
+      },
+      saveAnswer: async (answer) => {
+        const response = await saveAnswerRequest(answer)
+        setState(response.state)
+        return response.answer
       },
     }),
     [],

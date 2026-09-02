@@ -51,7 +51,7 @@ export default function WriteAnswerPage() {
   useEffect(() => {
     if (savedAnswer) feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [savedAnswer])
-  const submit = () => {
+  const submit = async () => {
     const trimmed = content.trim()
     const length = trimmed.length
     if (length < writingPrompt.minCharacters || length > writingPrompt.maxCharacters) {
@@ -59,8 +59,8 @@ export default function WriteAnswerPage() {
       return
     }
     setSaving(true)
-    setTimeout(() => {
-      const answer = saveAnswer({
+    try {
+      const answer = await saveAnswer({
         title: writingPrompt.title,
         promptNumber: number,
         promptId: writingPrompt.id,
@@ -71,8 +71,11 @@ export default function WriteAnswerPage() {
       })
       localStorage.removeItem(draftKey)
       setSavedAnswer(answer)
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
       setSaving(false)
-    }, 650)
+    }
   }
   return (
     <Layout>
@@ -204,7 +207,12 @@ export default function WriteAnswerPage() {
                 {writingPrompt.minCharacters}~{writingPrompt.maxCharacters}
                 {t('common.characters')} · {t('writing.autoNote')}
               </span>
-              <Button size="lg" onClick={submit} loading={saving} disabled={Boolean(savedAnswer)}>
+              <Button
+                size="lg"
+                onClick={() => void submit()}
+                loading={saving}
+                disabled={Boolean(savedAnswer)}
+              >
                 {savedAnswer ? <CheckCircle2 size={18} /> : <Save size={18} />}{' '}
                 {savedAnswer ? t('writing.saveComplete') : t('writing.save')}
               </Button>

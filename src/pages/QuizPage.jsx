@@ -21,7 +21,7 @@ export default function QuizPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [index])
-  const next = () => {
+  const next = async () => {
     if (selections[index] === null) {
       setError(t('quiz.selectError'))
       return
@@ -32,7 +32,7 @@ export default function QuizPage() {
       return
     }
     setSubmitting(true)
-    setTimeout(() => {
+    try {
       const result = {
         ...calculateQuizResult(quizQuestions, selections),
         selections,
@@ -41,9 +41,12 @@ export default function QuizPage() {
         quizDate: dailyQuiz.dateKey,
         completedAt: new Date().toISOString(),
       }
-      completeQuiz(dailyQuiz.id, result)
-      navigate(path('/quiz/result'), { state: { result } })
-    }, 550)
+      const savedResult = await completeQuiz(dailyQuiz.id, result)
+      navigate(path('/quiz/result'), { state: { result: savedResult } })
+    } catch (requestError) {
+      setError(requestError.message)
+      setSubmitting(false)
+    }
   }
   return (
     <Layout>
@@ -101,7 +104,7 @@ export default function QuizPage() {
           ) : null}
           <div className="quiz-actions">
             <span>{t('quiz.hint')}</span>
-            <Button size="lg" onClick={next} loading={submitting}>
+            <Button size="lg" onClick={() => void next()} loading={submitting}>
               {index === quizQuestions.length - 1 ? t('quiz.result') : t('quiz.next')}{' '}
               <ArrowRight size={18} />
             </Button>
