@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import answersHandler from './answers.js'
-import loginHandler from './auth-login.js'
-import meHandler from './me.js'
+import answersHandler from '../api/answers.js'
+import loginHandler from '../api/auth-login.js'
+import meHandler from '../api/me.js'
 
 function request(method, body, token) {
   return {

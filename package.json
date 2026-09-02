@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write \"{src,api}/**/*.{js,jsx}\"",
-    "format:check": "prettier --check \"{src,api}/**/*.{js,jsx}\""
+    "format": "prettier --write --end-of-line auto \"{src,api,tests}/**/*.{js,jsx}\"",
+    "format:check": "prettier --check --end-of-line auto \"{src,api,tests}/**/*.{js,jsx}\""
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
