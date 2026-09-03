@@ -16,6 +16,7 @@ import { Button, Card, Textarea } from '../components/ui'
 import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
 import { getDailyWritingPrompt } from '../lib/dailyContent'
+import { getUserDraftKey, readUserDraft } from '../lib/drafts'
 import { getWritingFeedback } from '../lib/writingFeedback'
 import { getWritingReward, getWritingTaskNumber, isEssayTask } from '../lib/writingTask'
 
@@ -23,7 +24,7 @@ export default function WriteAnswerPage() {
   const navigate = useNavigate()
   const { questionNumber } = useParams()
   const { t, path } = useLanguage()
-  const { saveAnswer } = useApp()
+  const { saveAnswer, user } = useApp()
   const number = getWritingTaskNumber(questionNumber)
   const isEssay = isEssayTask(number)
   const reward = getWritingReward(number)
@@ -35,11 +36,11 @@ export default function WriteAnswerPage() {
   const [saving, setSaving] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
   const [savedAnswer, setSavedAnswer] = useState(null)
-  const draftKey = `octopus-topic-answer-${number}-draft-${writingPrompt.dailyId}`
+  const draftKey = getUserDraftKey(user.id, number, writingPrompt.dailyId)
   useEffect(() => {
-    const draft = localStorage.getItem(draftKey)
+    const draft = readUserDraft(localStorage, user.id, number, writingPrompt.dailyId)
     if (draft) setContent(draft)
-  }, [draftKey])
+  }, [draftKey, number, user.id, writingPrompt.dailyId])
   useEffect(() => {
     if (!content || savedAnswer) return
     const timer = setTimeout(() => {

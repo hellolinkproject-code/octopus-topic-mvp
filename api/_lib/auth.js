@@ -31,13 +31,13 @@ export function verifyPassword(password, user) {
   return stored.length === candidate.length && timingSafeEqual(stored, candidate)
 }
 
-export async function createAccessToken(userId) {
+export async function createAccessToken(userId, expiration = '7d') {
   return new SignJWT({ sub: userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setIssuer(issuer)
     .setAudience(audience)
-    .setExpirationTime('7d')
+    .setExpirationTime(expiration)
     .sign(secret())
 }
 

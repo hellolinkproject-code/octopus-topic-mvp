@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  if (user) return <Navigate to={path('/dashboard')} replace />
+  if (user) return <Navigate to={location.state?.from || path('/dashboard')} replace />
   const submit = async (e) => {
     e.preventDefault()
     const next = {}

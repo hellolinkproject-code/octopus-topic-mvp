@@ -8,6 +8,10 @@ export default function ProtectedRoute({ children }) {
   return user ? (
     children
   ) : (
-    <Navigate to={path('/login')} replace state={{ from: location.pathname }} />
+    <Navigate
+      to={path('/login')}
+      replace
+      state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+    />
   )
 }

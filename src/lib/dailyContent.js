@@ -1,4 +1,5 @@
-import { essayPromptBank, quizQuestionBank, writingPromptBank } from '../data/mockData'
+import { essayPromptBank, writingPromptBank } from '../data/mockData'
+import { getDailyQuizForClient } from './officialQuiz'
 import { getWritingTaskNumber, isEssayTask, WRITING_TASK } from './writingTask'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -15,19 +16,7 @@ export function getDayNumber(date = new Date()) {
 }
 
 export function getDailyQuiz(date = new Date()) {
-  const dayNumber = getDayNumber(date)
-  const dateKey = getLocalDateKey(date)
-  const pools = Object.values(quizQuestionBank)
-  const questions = pools.map((pool, poolIndex) => ({
-    ...pool[(dayNumber * (poolIndex + 1) + poolIndex * 3) % pool.length],
-    number: poolIndex + 1,
-  }))
-
-  return {
-    id: `daily-quiz-${dateKey}`,
-    dateKey,
-    questions,
-  }
+  return getDailyQuizForClient(date)
 }
 
 export function getDailyWritingPrompt(

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { essayPromptBank, quizQuestionBank, writingPromptBank } from '../data/mockData'
+import { essayPromptBank, writingPromptBank } from '../data/mockData'
+import { quizQuestionBank } from '../data/quizQuestionBank'
+import { quizAnswerKey } from '../../api/_lib/quizAnswerKey'
 import { getDailyQuiz, getDailyWritingPrompt, getLocalDateKey } from './dailyContent'
 
 describe('daily problem bank selection', () => {
@@ -33,11 +35,14 @@ describe('daily problem bank selection', () => {
 
     expect(new Set(ids).size).toBe(ids.length)
     questions.forEach((item) => {
+      const verified = quizAnswerKey[item.id]
       expect(item.options).toHaveLength(4)
-      expect(item.answer).toBeGreaterThanOrEqual(0)
-      expect(item.answer).toBeLessThan(4)
-      expect(item.options[item.answer]).toBeTruthy()
-      expect(item.explanation.length).toBeGreaterThan(10)
+      expect(item).not.toHaveProperty('answer')
+      expect(item).not.toHaveProperty('explanation')
+      expect(verified.answer).toBeGreaterThanOrEqual(0)
+      expect(verified.answer).toBeLessThan(4)
+      expect(item.options[verified.answer]).toBeTruthy()
+      expect(verified.explanation.length).toBeGreaterThan(10)
     })
   })
 

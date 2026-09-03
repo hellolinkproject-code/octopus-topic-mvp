@@ -1,7 +1,8 @@
-import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
-import { LoadingScreen } from './components/ui'
+import { Button, LoadingScreen } from './components/ui'
 import { useApp } from './context/AppContext'
+import { useLanguage } from './i18n/LanguageContext'
 import { supportedLanguages } from './i18n/translations'
 import { WRITING_TASK } from './lib/writingTask'
 import LandingPage from './pages/LandingPage'
@@ -43,8 +44,30 @@ function LegacyAnswerRedirect() {
 }
 const localized = (page) => <LanguageRoute>{page}</LanguageRoute>
 export default function App() {
-  const { isInitializing } = useApp()
+  const { isInitializing, restoreError, retryRestore, logout } = useApp()
+  const { t, path } = useLanguage()
+  const location = useLocation()
+  const navigate = useNavigate()
   if (isInitializing) return <LoadingScreen />
+  if (restoreError) {
+    const loginAgain = () => {
+      const from = `${location.pathname}${location.search}${location.hash}`
+      logout()
+      navigate(path('/login'), { replace: true, state: { from } })
+    }
+    return (
+      <main className="loading-screen restore-error" role="alert">
+        <h1>{t('common.restoreTitle')}</h1>
+        <p>{t('common.restoreMessage')}</p>
+        <div>
+          <Button onClick={() => void retryRestore()}>{t('common.retry')}</Button>
+          <Button variant="outline" onClick={loginAgain}>
+            {t('common.loginAgain')}
+          </Button>
+        </div>
+      </main>
+    )
+  }
   return (
     <Routes>
       <Route path="/" element={<LegacyRedirect />} />

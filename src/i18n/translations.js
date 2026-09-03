@@ -87,6 +87,10 @@ const ko = {
     characters: '자',
     items: '개',
     days: '일',
+    restoreTitle: '학습 기록을 불러오지 못했어요',
+    restoreMessage: '연결 상태를 확인한 뒤 다시 시도하거나 로그인 화면으로 이동해 주세요.',
+    retry: '다시 시도',
+    loginAgain: '로그인 화면으로',
   },
   dashboard: {
     greeting: '님, 오늘도',
@@ -318,6 +322,10 @@ const en = {
     characters: ' chars',
     items: '',
     days: ' days',
+    restoreTitle: 'Could not load your learning record',
+    restoreMessage: 'Check your connection and retry, or go to the login screen.',
+    retry: 'Retry',
+    loginAgain: 'Go to login',
   },
   dashboard: {
     greeting: ', ready for',

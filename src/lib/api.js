@@ -1,4 +1,5 @@
-const TOKEN_KEY = 'octopus-topic-access-token-v1'
+export const ACCESS_TOKEN_KEY = 'octopus-topic-access-token-v1'
+const authExpiredListeners = new Set()
 
 export class ApiError extends Error {
   constructor(message, status, details) {
@@ -24,7 +25,7 @@ async function parseResponse(response) {
 }
 
 async function authFetch(url, options = {}) {
-  const token = localStorage.getItem(TOKEN_KEY)
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY)
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -34,16 +35,28 @@ async function authFetch(url, options = {}) {
     },
   })
 
-  if (response.status === 401) localStorage.removeItem(TOKEN_KEY)
+  if ([401, 403].includes(response.status)) {
+    clearAccessToken()
+    authExpiredListeners.forEach((listener) => listener(response.status))
+  }
   return parseResponse(response)
 }
 
 export function hasAccessToken() {
-  return Boolean(localStorage.getItem(TOKEN_KEY))
+  return Boolean(localStorage.getItem(ACCESS_TOKEN_KEY))
 }
 
 export function clearAccessToken() {
-  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(ACCESS_TOKEN_KEY)
+}
+
+export function isAuthorizationError(error) {
+  return error instanceof ApiError && [401, 403].includes(error.status)
+}
+
+export function subscribeToAuthExpired(listener) {
+  authExpiredListeners.add(listener)
+  return () => authExpiredListeners.delete(listener)
 }
 
 export async function loginRequest(email, password) {
@@ -54,7 +67,7 @@ export async function loginRequest(email, password) {
       body: JSON.stringify({ email, password, name: email.split('@')[0] }),
     }),
   )
-  localStorage.setItem(TOKEN_KEY, payload.accessToken)
+  localStorage.setItem(ACCESS_TOKEN_KEY, payload.accessToken)
   return payload.state
 }
 
@@ -62,10 +75,10 @@ export async function fetchMyState() {
   return authFetch('/api/me')
 }
 
-export async function completeQuizRequest(quizId, result) {
+export async function completeQuizRequest(quizId, selections) {
   return authFetch('/api/me', {
     method: 'PATCH',
-    body: JSON.stringify({ action: 'completeQuiz', quizId, result }),
+    body: JSON.stringify({ quizId, selections }),
   })
 }
 

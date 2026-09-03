@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { Button, Card } from '../components/ui'
 import { getDailyQuiz } from '../lib/dailyContent'
-import { calculateQuizResult } from '../lib/progress'
 import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
 export default function QuizPage() {
@@ -33,15 +32,7 @@ export default function QuizPage() {
     }
     setSubmitting(true)
     try {
-      const result = {
-        ...calculateQuizResult(quizQuestions, selections),
-        selections,
-        questions: quizQuestions,
-        quizId: dailyQuiz.id,
-        quizDate: dailyQuiz.dateKey,
-        completedAt: new Date().toISOString(),
-      }
-      const savedResult = await completeQuiz(dailyQuiz.id, result)
+      const savedResult = await completeQuiz(dailyQuiz.id, selections)
       navigate(path('/quiz/result'), { state: { result: savedResult } })
     } catch (requestError) {
       setError(requestError.message)

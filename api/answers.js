@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { requireUserId } from './_lib/auth.js'
 import {
@@ -25,6 +25,21 @@ const schema = z.object({
   freeFeedback: z.record(z.string(), z.unknown()).optional(),
 })
 
+function getIdempotencyKey(userId, answer) {
+  return createHash('sha256')
+    .update(`${userId}|${answer.promptNumber}|${answer.promptId}|${answer.promptDate}`)
+    .digest('hex')
+}
+
+function isSamePrompt(answer, candidate, idempotencyKey) {
+  return (
+    candidate.idempotencyKey === idempotencyKey ||
+    (candidate.promptNumber === answer.promptNumber &&
+      candidate.promptId === answer.promptId &&
+      candidate.promptDate === answer.promptDate)
+  )
+}
+
 export default async function handler(request, response) {
   if (!['GET', 'POST'].includes(request.method)) return invalidMethod(response, ['GET', 'POST'])
 
@@ -49,12 +64,25 @@ export default async function handler(request, response) {
       )
     }
 
+    const idempotencyKey = getIdempotencyKey(userId, parsed.data)
+    const existingAnswer = user.answers.find((answer) =>
+      isSamePrompt(parsed.data, answer, idempotencyKey),
+    )
+    if (existingAnswer) {
+      return response.status(200).json({
+        answer: existingAnswer,
+        awarded: false,
+        state: publicState(user),
+      })
+    }
+
     const answer = {
       ...parsed.data,
       content,
       characterCount: content.length,
       earnedPoints: rule.reward,
-      id: randomUUID(),
+      id: `answer-${idempotencyKey}`,
+      idempotencyKey,
       createdAt: new Date().toISOString(),
     }
     const nextUser = await writeUser({
@@ -62,7 +90,7 @@ export default async function handler(request, response) {
       points: user.points + rule.reward,
       answers: [answer, ...user.answers],
     })
-    return response.status(201).json({ answer, state: publicState(nextUser) })
+    return response.status(201).json({ answer, awarded: true, state: publicState(nextUser) })
   } catch (error) {
     return serverError(response, error)
   }
