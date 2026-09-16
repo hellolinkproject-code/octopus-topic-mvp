@@ -748,4 +748,33 @@ vi.layout.answers = 'Luyện viết'
 mn.layout.answers = 'Бичгийн дадлага'
 ja.layout.answers = '作文練習'
 
+// The existing secondary locales inherit English for untranslated study UI.
+ko.feedback = feedbackKo
+for (const language of [en, zh, vi, mn, ja]) language.feedback = feedbackEn
+ko.dashboard.writeReward = '53번 완료 +30P · 54번 저장 무료'
+en.dashboard.writeReward = 'Question 53 +30P · Question 54 saves free'
+ko.premium = {
+  ...ko.premium,
+  badge: 'AI 맞춤 첨삭',
+  intro: '퀴즈와 53번 쓰기로 포인트를 모으고, 54번 답안의 맞춤 첨삭에 사용해요.',
+  featureScore: '내용·구성·표현 피드백',
+  featureRewrite: '다음 쓰기를 위한 연습 팁',
+  resultText: '54번 답안의 내용과 문장을 분석합니다. 결과 저장 시 50P를 사용해요.',
+}
+en.premium = {
+  ...en.premium,
+  badge: 'AI FEEDBACK',
+  intro:
+    'Earn points with quizzes and Question 53, then use them for personal Question 54 feedback.',
+  featureScore: 'Content, organization and language advice',
+  featureRewrite: 'Tips for your next answer',
+  resultText:
+    'Review the content and sentences in your Question 54 answer. Feedback costs 50P when saved.',
+}
+for (const language of [zh, vi, mn, ja]) {
+  language.premium = en.premium
+  language.dashboard.writeReward = en.dashboard.writeReward
+}
+
 export const translations = { ko, en, zh, vi, mn, ja }
+import { feedbackKo, feedbackEn } from './feedback.js'

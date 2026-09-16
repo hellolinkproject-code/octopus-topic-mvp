@@ -24,6 +24,17 @@ export function unauthorized(response) {
 }
 
 export function serverError(response, error) {
-  console.error(error)
+  if (error?.status && error?.code) {
+    return sendError(response, error.status, error.code, error.message)
+  }
+  // Never log provider payloads, learner answers, credentials, or Blob URLs.
+  console.error('API request failed', {
+    type: error?.constructor?.name || 'Error',
+    code: /^[A-Z_]+$/.test(error?.message || '') ? error.message : 'UNCLASSIFIED',
+  })
   return sendError(response, 500, 'INTERNAL_ERROR', '서버에서 요청을 처리하지 못했습니다.')
+}
+
+export function apiError(status, code, message) {
+  return Object.assign(new Error(message), { status, code })
 }

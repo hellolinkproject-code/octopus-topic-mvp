@@ -19,7 +19,7 @@ describe('writing task policy', () => {
 
   it('returns the reward configured for each writing task', () => {
     expect(getWritingReward(WRITING_TASK.GRAPH)).toBe(30)
-    expect(getWritingReward(WRITING_TASK.ESSAY)).toBe(50)
+    expect(getWritingReward(WRITING_TASK.ESSAY)).toBe(0)
     expect(getWritingReward(55)).toBe(0)
   })
 

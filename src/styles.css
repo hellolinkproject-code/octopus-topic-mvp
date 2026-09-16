@@ -48,3 +48,24 @@ body{background:#fff;color:var(--ink)}
 .premium-intro .button:disabled,.premium-feedback-card .button:disabled{cursor:not-allowed}
 @media(max-width:680px){.writing-home{padding-top:28px}.writing-home-hero{align-items:stretch;flex-direction:column;padding:26px 22px}.writing-home-hero h1{font-size:28px;line-height:1.25}.writing-home-hero>.button{width:100%}.premium-intro ul{align-items:flex-start;flex-direction:column}.premium-feedback-card{align-items:flex-start;flex-wrap:wrap}.premium-feedback-card>.button{width:100%}}
 .passage,.review-passage{white-space:pre-line}
+/* Mission 8: saved feedback and explicit point use. */
+.ai-feedback { margin-top: 24px; padding: clamp(20px, 4vw, 36px); }
+.ai-feedback p, .ai-feedback li { font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+.ai-feedback h3 { margin: 24px 0 10px; }
+.ai-feedback h4 { margin: 12px 0 4px; font-size: 14px; color: var(--muted); }
+.feedback-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.feedback-result ul, .feedback-result ol { padding-left: 22px; }
+.feedback-result li + li { margin-top: 8px; }
+.feedback-balance { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+.feedback-balance strong { color: var(--purple); font-size: 28px; }
+.feedback-note, .feedback-receipt { padding: 14px 18px; background: var(--soft); border-radius: 12px; }
+.feedback-warning { padding: 14px; background: #fff8e6; border-radius: 12px; }
+.feedback-warning a { text-decoration: underline; }
+.feedback-consent { display: flex; align-items: flex-start; gap: 12px; margin: 20px 0; line-height: 1.7; font-size: 16px; cursor: pointer; }
+.feedback-consent input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 4px; accent-color: var(--purple); }
+.feedback-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+.sentence-correction { border: 1px solid var(--line); padding: 18px; margin: 14px 0; border-radius: 12px; }
+.sentence-correction blockquote { margin: 0; padding-left: 14px; border-left: 3px solid #d9cfe7; line-height: 1.8; overflow-wrap: anywhere; }
+.revised-sentence { color: var(--dark); }
+@media (max-width: 600px) { .feedback-columns { grid-template-columns: 1fr; gap: 0; } .feedback-buttons .button { width: 100%; white-space: normal; } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none !important; } }

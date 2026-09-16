@@ -1,4 +1,4 @@
-import { WRITING_TASK } from '../lib/writingTask'
+import { WRITING_TASK } from '../lib/writingTask.js'
 
 const series = (first, second) => [
   { key: 'first', label: first, color: '#d7c7ed' },

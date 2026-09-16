@@ -13,7 +13,7 @@ import Layout from '../components/Layout'
 import { Button, Card } from '../components/ui'
 import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
-import { getWritingReward, WRITING_TASK } from '../lib/writingTask'
+import { FEEDBACK_COST, getWritingReward, WRITING_TASK } from '../lib/writingTask'
 
 export default function WritingHomePage() {
   const { answers } = useApp()
@@ -61,7 +61,11 @@ export default function WritingHomePage() {
               <p>{task.description}</p>
               <div className="writing-choice-meta">
                 <span>{task.meta}</span>
-                <span>+{getWritingReward(task.number)} P</span>
+                <span>
+                  {task.number === 53
+                    ? `+${getWritingReward(task.number)} P`
+                    : `${t('feedback.cost')} ${FEEDBACK_COST}P`}
+                </span>
                 <span>
                   {count(task.number)}
                   {t('common.items')}
@@ -99,9 +103,9 @@ export default function WritingHomePage() {
               </li>
             </ul>
           </div>
-          <Button variant="soft" disabled>
-            <LockKeyhole size={17} />
-            {t('premium.soon')}
+          <Button variant="soft" onClick={() => navigate(path('/writing/54/new'))}>
+            <Sparkles size={17} />
+            {t('feedback.write54')}
           </Button>
         </Card>
       </main>

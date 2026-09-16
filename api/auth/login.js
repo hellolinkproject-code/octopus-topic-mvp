@@ -5,9 +5,9 @@ import {
   normalizeEmail,
   userIdFromEmail,
   verifyPassword,
-} from './_lib/auth.js'
-import { invalidMethod, sendError, serverError, validationError } from './_lib/http.js'
-import { createUser, publicState, readUser, writeUser } from './_lib/store.js'
+} from '../_lib/auth.js'
+import { invalidMethod, sendError, serverError, validationError } from '../_lib/http.js'
+import { createUser, publicState, updateUser } from '../_lib/store.js'
 
 const schema = z.object({
   email: z.email('올바른 이메일 주소를 입력해 주세요.'),
@@ -24,19 +24,19 @@ export default async function handler(request, response) {
   try {
     const email = normalizeEmail(parsed.data.email)
     const id = userIdFromEmail(email)
-    let user = await readUser(id)
-    if (!user) {
-      user = await writeUser(
-        createUser({
+    const passwordRecord = createPasswordRecord(parsed.data.password)
+    const user = await updateUser(id, (current) => {
+      if (!current)
+        return createUser({
           id,
           email,
           name: parsed.data.name || email.split('@')[0],
-          passwordRecord: createPasswordRecord(parsed.data.password),
-        }),
-      )
-    } else if (!user.passwordHash) {
-      user = await writeUser({ ...user, ...createPasswordRecord(parsed.data.password) })
-    } else if (!verifyPassword(parsed.data.password, user)) {
+          passwordRecord,
+        })
+      if (!current.passwordHash) return { ...current, ...passwordRecord }
+      return current
+    })
+    if (!verifyPassword(parsed.data.password, user)) {
       return sendError(
         response,
         401,

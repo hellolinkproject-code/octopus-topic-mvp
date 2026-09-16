@@ -7,8 +7,10 @@ export const WRITING_TASK_NUMBERS = Object.freeze(Object.values(WRITING_TASK))
 
 export const WRITING_REWARD = Object.freeze({
   [WRITING_TASK.GRAPH]: 30,
-  [WRITING_TASK.ESSAY]: 50,
+  [WRITING_TASK.ESSAY]: 0,
 })
+
+export const FEEDBACK_COST = 50
 
 export const isWritingTask = (number) => WRITING_TASK_NUMBERS.includes(Number(number))
 

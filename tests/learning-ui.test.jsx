@@ -92,6 +92,8 @@ describe('learning save UI', () => {
     fireEvent.change(screen.getByRole('textbox'), { target: { value: content } })
     await user.click(screen.getByRole('button', { name: /답안 저장/ }))
     await waitFor(() => expect(app.saveAnswer).toHaveBeenCalledTimes(1))
+    expect(app.saveAnswer.mock.calls[0][0]).not.toHaveProperty('characterCount')
+    expect(app.saveAnswer.mock.calls[0][0].content).toBe(content)
     expect((await screen.findByRole('button', { name: /저장 완료/ })).disabled).toBe(true)
   })
 

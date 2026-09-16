@@ -7,7 +7,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom'
 import App from '../src/App'
 import { AppProvider, useApp } from '../src/context/AppContext'
 import { LanguageProvider } from '../src/i18n/LanguageContext'
-import { ACCESS_TOKEN_KEY } from '../src/lib/api'
+import { ACCESS_TOKEN_KEY, completeQuizRequest } from '../src/lib/api'
 
 const serverState = {
   user: { id: 'user-a', email: 'a@example.com', name: 'A', joinedAt: '2026-09-01' },
@@ -96,6 +96,10 @@ describe('frontend authentication behavior', () => {
     await userEvent.click(screen.getByRole('button', { name: 'login' }))
     expect(await screen.findByText('a@example.com')).toBeTruthy()
     expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe('login-token')
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/auth/login',
+      expect.objectContaining({ method: 'POST' }),
+    )
   })
 
   it('returns to the originally requested multilingual route after login', async () => {
@@ -125,7 +129,7 @@ describe('frontend authentication behavior', () => {
 
   it('restores server state after a refresh', async () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, 'saved-token')
-    fetch.mockResolvedValue(jsonResponse(serverState))
+    fetch.mockResolvedValue(jsonResponse({ state: serverState }))
     renderProvider()
     expect(await screen.findByText('a@example.com')).toBeTruthy()
     expect(fetch).toHaveBeenCalledWith(
@@ -160,7 +164,7 @@ describe('frontend authentication behavior', () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, 'keep-token')
     fetch
       .mockResolvedValueOnce(jsonResponse({ error: { message: 'temporary failure' } }, 500))
-      .mockResolvedValueOnce(jsonResponse(serverState))
+      .mockResolvedValueOnce(jsonResponse({ state: serverState }))
     render(
       <MemoryRouter initialEntries={['/ko/dashboard']}>
         <LanguageProvider>
@@ -180,12 +184,28 @@ describe('frontend authentication behavior', () => {
   it('clears global user state when an in-use save returns 401', async () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, 'expired-during-use')
     fetch
-      .mockResolvedValueOnce(jsonResponse(serverState))
+      .mockResolvedValueOnce(jsonResponse({ state: serverState }))
       .mockResolvedValueOnce(jsonResponse({ error: { message: 'expired' } }, 401))
     renderProvider()
     expect(await screen.findByText('a@example.com')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'save' }))
     await waitFor(() => expect(screen.getByTestId('user').textContent).toBe(''))
     expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull()
+  })
+
+  it('posts quiz selections to the quiz-attempt resource', async () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, 'quiz-token')
+    fetch.mockResolvedValue(jsonResponse({ state: serverState }))
+
+    const payload = await completeQuizRequest('daily-quiz-2026-09-03', [0, 1, 2])
+
+    expect(payload).toEqual({ state: serverState })
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/quiz-attempts',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ quizId: 'daily-quiz-2026-09-03', selections: [0, 1, 2] }),
+      }),
+    )
   })
 })

@@ -1,6 +1,7 @@
 import { ArrowLeft, CalendarDays, FileText, PenLine } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../components/Layout'
+import FeedbackPanel from '../components/FeedbackPanel'
 import { Button, Card } from '../components/ui'
 import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
@@ -56,6 +57,7 @@ export default function AnswerDetailPage() {
           </div>
           <article>{answer.content}</article>
         </Card>
+        {answer.promptNumber === 54 ? <FeedbackPanel key={answer.id} answer={answer} /> : null}
         <div className="detail-actions">
           <Button variant="outline" onClick={() => navigate(path('/answers'))}>
             {t('answers.back')}

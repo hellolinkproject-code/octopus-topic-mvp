@@ -1,9 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import answersHandler from '../api/answers.js'
-import loginHandler from '../api/auth-login.js'
+import loginHandler from '../api/auth/login.js'
 import meHandler from '../api/me.js'
+import quizAttemptsHandler from '../api/quiz-attempts.js'
 import { createAccessToken } from '../api/_lib/auth.js'
 import { getOfficialDailyQuiz } from '../api/_lib/officialQuiz.js'
+import { getDailyWritingPrompt } from '../src/lib/dailyContent.js'
 
 const NOW = new Date('2026-09-02T15:00:00.000Z')
 const QUIZ_ID = 'daily-quiz-2026-09-03'
@@ -75,14 +77,19 @@ describe('Mission 7 API contracts', () => {
 
     const wrongMethod = await call(meHandler, request('POST', {}, token))
     expect(wrongMethod.statusCode).toBe(405)
-    expect(wrongMethod.headers.Allow).toBe('GET, PATCH')
+    expect(wrongMethod.headers.Allow).toBe('GET')
     expect(wrongMethod.body.error).toMatchObject({ code: 'METHOD_NOT_ALLOWED' })
+
+    const wrongQuizMethod = await call(quizAttemptsHandler, request('PATCH', {}, token))
+    expect(wrongQuizMethod.statusCode).toBe(405)
+    expect(wrongQuizMethod.headers.Allow).toBe('POST')
+    expect(wrongQuizMethod.body.error).toMatchObject({ code: 'METHOD_NOT_ALLOWED' })
   })
 
   it('returns 404 for an unknown quiz', async () => {
     const res = await call(
-      meHandler,
-      request('PATCH', { quizId: 'daily-quiz-2020-01-01', selections: [0, 0, 0] }, token),
+      quizAttemptsHandler,
+      request('POST', { quizId: 'daily-quiz-2020-01-01', selections: [0, 0, 0] }, token),
     )
     expect(res.statusCode).toBe(404)
     expect(res.body.error).toMatchObject({ code: 'QUIZ_NOT_FOUND' })
@@ -91,9 +98,9 @@ describe('Mission 7 API contracts', () => {
   it('rejects extra quiz fields and cannot trust forged answers', async () => {
     const before = await call(meHandler, request('GET', undefined, token))
     const forged = await call(
-      meHandler,
+      quizAttemptsHandler,
       request(
-        'PATCH',
+        'POST',
         {
           quizId: QUIZ_ID,
           selections: [0, 0, 0],
@@ -107,20 +114,20 @@ describe('Mission 7 API contracts', () => {
     expect(forged.statusCode).toBe(400)
     expect(forged.body.error.code).toBe('VALIDATION_ERROR')
     const after = await call(meHandler, request('GET', undefined, token))
-    expect(after.body.points).toBe(before.body.points)
+    expect(after.body.state.points).toBe(before.body.state.points)
   })
 
   it('rejects mismatched counts and out-of-range selections', async () => {
     const count = await call(
-      meHandler,
-      request('PATCH', { quizId: QUIZ_ID, selections: [0] }, token),
+      quizAttemptsHandler,
+      request('POST', { quizId: QUIZ_ID, selections: [0] }, token),
     )
     expect(count.statusCode).toBe(400)
     expect(count.body.error.code).toBe('SELECTION_COUNT_MISMATCH')
 
     const range = await call(
-      meHandler,
-      request('PATCH', { quizId: QUIZ_ID, selections: [0, 99, 0] }, token),
+      quizAttemptsHandler,
+      request('POST', { quizId: QUIZ_ID, selections: [0, 99, 0] }, token),
     )
     expect(range.statusCode).toBe(400)
     expect(range.body.error.code).toBe('SELECTION_OUT_OF_RANGE')
@@ -130,21 +137,27 @@ describe('Mission 7 API contracts', () => {
     const quiz = getOfficialDailyQuiz('2026-09-03')
     const selections = quiz.questions.map((question) => question.answer)
     const before = await call(meHandler, request('GET', undefined, token))
-    const first = await call(meHandler, request('PATCH', { quizId: QUIZ_ID, selections }, token))
+    const first = await call(
+      quizAttemptsHandler,
+      request('POST', { quizId: QUIZ_ID, selections }, token),
+    )
     expect(first.statusCode).toBe(200)
-    expect(first.body.points).toBe(before.body.points + 50)
-    expect(first.body.latestQuizResult).toMatchObject({
+    expect(first.body.state.points).toBe(before.body.state.points + 50)
+    expect(first.body.state.latestQuizResult).toMatchObject({
       score: 100,
       earnedPoints: 50,
       awarded: true,
     })
-    expect(first.body.latestQuizResult.questions[0]).toHaveProperty('answer')
-    expect(first.body.latestQuizResult.questions[0]).toHaveProperty('explanation')
+    expect(first.body.state.latestQuizResult.questions[0]).toHaveProperty('answer')
+    expect(first.body.state.latestQuizResult.questions[0]).toHaveProperty('explanation')
 
-    const second = await call(meHandler, request('PATCH', { quizId: QUIZ_ID, selections }, token))
+    const second = await call(
+      quizAttemptsHandler,
+      request('POST', { quizId: QUIZ_ID, selections }, token),
+    )
     expect(second.statusCode).toBe(200)
-    expect(second.body.points).toBe(first.body.points)
-    expect(second.body.latestQuizResult.awarded).toBe(false)
+    expect(second.body.state.points).toBe(first.body.state.points)
+    expect(second.body.state.latestQuizResult.awarded).toBe(false)
   })
 
   it('stores an answer once and makes a sequential retry idempotent', async () => {
@@ -152,16 +165,16 @@ describe('Mission 7 API contracts', () => {
     const payload = {
       title: '53번 테스트',
       promptNumber: 53,
-      promptId: 'prompt-53-a',
+      promptId: getDailyWritingPrompt(53, new Date('2026-09-03T03:00:00Z')).id,
       promptDate: '2026-09-03',
       content,
-      characterCount: content.length,
     }
     const before = await call(meHandler, request('GET', undefined, token))
     const first = await call(answersHandler, request('POST', payload, token))
     expect(first.statusCode).toBe(201)
     expect(first.body.awarded).toBe(true)
-    expect(first.body.state.points).toBe(before.body.points + 30)
+    expect(first.body.answer.characterCount).toBe(content.length)
+    expect(first.body.state.points).toBe(before.body.state.points + 30)
 
     const retry = await call(answersHandler, request('POST', payload, token))
     expect(retry.statusCode).toBe(200)
@@ -181,17 +194,16 @@ describe('Mission 7 API contracts', () => {
         {
           title: '다른 53번 테스트',
           promptNumber: 53,
-          promptId: 'prompt-53-b',
-          promptDate: '2026-09-03',
+          promptId: getDailyWritingPrompt(53, new Date('2026-09-02T03:00:00Z')).id,
+          promptDate: '2026-09-02',
           content,
-          characterCount: content.length,
         },
         token,
       ),
     )
     expect(saved.statusCode).toBe(201)
     expect(saved.body.awarded).toBe(true)
-    expect(saved.body.state.points).toBe(before.body.points + 30)
-    expect(saved.body.state.answers).toHaveLength(before.body.answers.length + 1)
+    expect(saved.body.state.points).toBe(before.body.state.points + 30)
+    expect(saved.body.state.answers).toHaveLength(before.body.state.answers.length + 1)
   })
 })

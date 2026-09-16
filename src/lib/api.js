@@ -61,7 +61,7 @@ export function subscribeToAuthExpired(listener) {
 
 export async function loginRequest(email, password) {
   const payload = await parseResponse(
-    await fetch('/api/auth-login', {
+    await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name: email.split('@')[0] }),
@@ -72,12 +72,13 @@ export async function loginRequest(email, password) {
 }
 
 export async function fetchMyState() {
-  return authFetch('/api/me')
+  const payload = await authFetch('/api/me')
+  return payload.state
 }
 
 export async function completeQuizRequest(quizId, selections) {
-  return authFetch('/api/me', {
-    method: 'PATCH',
+  return authFetch('/api/quiz-attempts', {
+    method: 'POST',
     body: JSON.stringify({ quizId, selections }),
   })
 }
@@ -91,4 +92,12 @@ export async function saveAnswerRequest(answer) {
 
 export async function fetchAnswers() {
   return authFetch('/api/answers')
+}
+
+export async function requestAnswerFeedback(answerId) {
+  return authFetch('/api/feedback', {
+    method: 'POST',
+    body: JSON.stringify({ answerId, consent: true }),
+    signal: AbortSignal.timeout(75000),
+  })
 }

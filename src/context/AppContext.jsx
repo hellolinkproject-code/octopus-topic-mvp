@@ -6,6 +6,7 @@ import {
   hasAccessToken,
   isAuthorizationError,
   loginRequest,
+  requestAnswerFeedback,
   saveAnswerRequest,
   subscribeToAuthExpired,
 } from '../lib/api'
@@ -54,6 +55,13 @@ export function AppProvider({ children }) {
       unsubscribe()
     }
   }, [restoreSession])
+  const acceptState = useCallback((next) => {
+    setState((current) => {
+      if (current.user?.id !== next.user.id) return current
+      if ((current.revision || 0) > (next.revision || 0)) return current
+      return next
+    })
+  }, [])
   const actions = useMemo(
     () => ({
       login: async (email, password) => {
@@ -68,18 +76,27 @@ export function AppProvider({ children }) {
         setRestoreError(null)
       },
       retryRestore: restoreSession,
+      refreshState: async () => {
+        const nextState = await fetchMyState()
+        acceptState(nextState)
+      },
+      requestFeedback: async (answerId) => {
+        const response = await requestAnswerFeedback(answerId)
+        acceptState(response.state)
+        return response.feedback
+      },
       completeQuiz: async (id, selections) => {
-        const nextState = await completeQuizRequest(id, selections)
-        setState(nextState)
+        const { state: nextState } = await completeQuizRequest(id, selections)
+        acceptState(nextState)
         return nextState.latestQuizResult
       },
       saveAnswer: async (answer) => {
         const response = await saveAnswerRequest(answer)
-        setState(response.state)
+        acceptState(response.state)
         return { ...response.answer, awarded: response.awarded }
       },
     }),
-    [restoreSession],
+    [restoreSession, acceptState],
   )
   const value = useMemo(
     () => ({ ...state, ...actions, isInitializing, restoreError }),

@@ -8,11 +8,12 @@ import {
   unauthorized,
   validationError,
 } from './_lib/http.js'
-import { publicState, readUser, writeUser } from './_lib/store.js'
+import { publicState, readUser, updateUser } from './_lib/store.js'
+import { essayPromptBank, writingPromptBank } from '../src/data/mockData.js'
 
 const limits = {
   53: { min: 200, max: 300, reward: 30 },
-  54: { min: 600, max: 700, reward: 50 },
+  54: { min: 600, max: 700, reward: 0 },
 }
 
 const schema = z.object({
@@ -21,7 +22,6 @@ const schema = z.object({
   promptId: z.string().min(1).max(100),
   promptDate: z.string().max(50),
   content: z.string().trim().min(1).max(700),
-  characterCount: z.number().int().nonnegative().max(700),
   freeFeedback: z.record(z.string(), z.unknown()).optional(),
 })
 
@@ -65,19 +65,34 @@ export default async function handler(request, response) {
     }
 
     const idempotencyKey = getIdempotencyKey(userId, parsed.data)
-    const existingAnswer = user.answers.find((answer) =>
-      isSamePrompt(parsed.data, answer, idempotencyKey),
-    )
-    if (existingAnswer) {
-      return response.status(200).json({
-        answer: existingAnswer,
-        awarded: false,
-        state: publicState(user),
-      })
+    const bank = parsed.data.promptNumber === 54 ? essayPromptBank : writingPromptBank
+    const prompt = bank.find((item) => item.id === parsed.data.promptId)
+    const date = new Date(`${parsed.data.promptDate}T00:00:00Z`)
+    const day = Math.floor(date.getTime() / 86400000)
+    const today = Math.floor((Date.now() + 9 * 3600000) / 86400000)
+    if (
+      !prompt ||
+      !Number.isFinite(day) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.promptDate) ||
+      date.toISOString().slice(0, 10) !== parsed.data.promptDate ||
+      bank[day % bank.length]?.id !== prompt.id
+    ) {
+      return sendError(response, 400, 'PROMPT_INVALID', '올바른 쓰기 문제를 선택해 주세요.')
     }
+    const isExisting = user.answers.some((item) => isSamePrompt(parsed.data, item, idempotencyKey))
+    if (!isExisting && (day < today - 1 || day > today + 1))
+      return sendError(
+        response,
+        400,
+        'PROMPT_EXPIRED',
+        '오늘의 쓰기 문제를 다시 열어 주세요. 작성한 초안은 보관됩니다.',
+      )
 
     const answer = {
-      ...parsed.data,
+      title: prompt.title,
+      promptNumber: parsed.data.promptNumber,
+      promptId: prompt.id,
+      promptDate: parsed.data.promptDate,
       content,
       characterCount: content.length,
       earnedPoints: rule.reward,
@@ -85,12 +100,24 @@ export default async function handler(request, response) {
       idempotencyKey,
       createdAt: new Date().toISOString(),
     }
-    const nextUser = await writeUser({
-      ...user,
-      points: user.points + rule.reward,
-      answers: [answer, ...user.answers],
+    let created = false
+    const nextUser = await updateUser(userId, (current) => {
+      created = !current.answers.some((item) => isSamePrompt(parsed.data, item, idempotencyKey))
+      if (!created) return current
+      return {
+        ...current,
+        points: current.points + rule.reward,
+        answers: [answer, ...current.answers],
+      }
     })
-    return response.status(201).json({ answer, awarded: true, state: publicState(nextUser) })
+    const savedAnswer = nextUser.answers.find((item) =>
+      isSamePrompt(parsed.data, item, idempotencyKey),
+    )
+    return response.status(created ? 201 : 200).json({
+      answer: savedAnswer,
+      awarded: created && rule.reward > 0,
+      state: publicState(nextUser),
+    })
   } catch (error) {
     return serverError(response, error)
   }

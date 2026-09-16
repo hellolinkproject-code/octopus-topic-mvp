@@ -5,7 +5,6 @@ import {
   Home,
   Lightbulb,
   ListChecks,
-  LockKeyhole,
   Save,
   Sparkles,
 } from 'lucide-react'
@@ -18,7 +17,7 @@ import { useLanguage } from '../i18n/LanguageContext'
 import { getDailyWritingPrompt } from '../lib/dailyContent'
 import { getUserDraftKey, readUserDraft } from '../lib/drafts'
 import { getWritingFeedback } from '../lib/writingFeedback'
-import { getWritingReward, getWritingTaskNumber, isEssayTask } from '../lib/writingTask'
+import { getWritingTaskNumber, isEssayTask } from '../lib/writingTask'
 
 export default function WriteAnswerPage() {
   const navigate = useNavigate()
@@ -27,7 +26,6 @@ export default function WriteAnswerPage() {
   const { saveAnswer, user } = useApp()
   const number = getWritingTaskNumber(questionNumber)
   const isEssay = isEssayTask(number)
-  const reward = getWritingReward(number)
   const writingPrompt = useMemo(() => getDailyWritingPrompt(number), [number])
   const feedback = useMemo(() => getWritingFeedback(writingPrompt), [writingPrompt])
   const feedbackRef = useRef(null)
@@ -50,7 +48,13 @@ export default function WriteAnswerPage() {
     return () => clearTimeout(timer)
   }, [content, draftKey, savedAnswer])
   useEffect(() => {
-    if (savedAnswer) feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (savedAnswer)
+      feedbackRef.current?.scrollIntoView({
+        behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
+          : 'smooth',
+        block: 'start',
+      })
   }, [savedAnswer])
   const submit = async () => {
     const trimmed = content.trim()
@@ -67,7 +71,6 @@ export default function WriteAnswerPage() {
         promptId: writingPrompt.id,
         promptDate: writingPrompt.dateKey,
         content: trimmed,
-        characterCount: length,
         freeFeedback: feedback,
       })
       localStorage.removeItem(draftKey)
@@ -224,7 +227,11 @@ export default function WriteAnswerPage() {
           <section className="writing-feedback" ref={feedbackRef} aria-live="polite">
             <div className="feedback-heading">
               <span>
-                <Sparkles size={18} />+{reward} P {t('writing.feedbackKickerText')}
+                <Sparkles size={18} />
+                {savedAnswer.awarded
+                  ? `+${savedAnswer.earnedPoints} P`
+                  : t('writing.saveComplete')}{' '}
+                {t('writing.feedbackKickerText')}
               </span>
               <h2>{t(isEssay ? 'writing.feedbackTitle54' : 'writing.feedbackTitle')}</h2>
               <p>{t(isEssay ? 'writing.feedbackIntro54' : 'writing.feedbackIntro')}</p>
@@ -270,9 +277,14 @@ export default function WriteAnswerPage() {
                 <h3>{t('premium.resultTitle')}</h3>
                 <p>{t('premium.resultText')}</p>
               </div>
-              <Button variant="soft" disabled>
-                <LockKeyhole size={17} />
-                {t('premium.soon')}
+              <Button
+                variant="soft"
+                onClick={() =>
+                  navigate(path(isEssay ? `/answers/${savedAnswer.id}` : '/writing/54/new'))
+                }
+              >
+                <Sparkles size={17} />
+                {t(isEssay ? 'feedback.open' : 'feedback.write54')}
               </Button>
             </Card>
             <div className="feedback-actions">
