@@ -57,6 +57,8 @@
 
 ## 검증 기록
 
+- 최종 코드 Preview: https://octopus-topic-dnrz9r03j-eeiiii.vercel.app — 핵심 API 재검증 통과.
+- 운영 배포: https://octopus-topic-mvp.vercel.app — 랜딩 페이지 브라우저 접속과 동일한 핵심 API 검증 통과. 운영 배포 ID: `dpl_3TWZUhHWtKa6obqX9FDw9Cunf3iA`, 기능 코드 커밋: `ceae6ce`. 아래 OpenAI 키 미설정 제한이 남아 있다.
 - 자동 테스트: 기존 전체 76개 및 추가 상태 동기화 테스트 2개 통과. 최종 저장소 수정 후 관련 17개 테스트를 다시 통과했다. AI 성공·실패는 외부 응답을 모의한 테스트이며 실제 OpenAI 호출 성공을 의미하지 않는다.
 - 코드 검사: 프로덕션 빌드, 포맷 검사, `git diff --check` 통과.
 - 브라우저: 로그인 → 54번 650자 저장 → 첨삭 화면 이동, 동의 체크박스와 키보드 탐색, 포인트 부족 상태, 키 미설정 오류와 잔액 유지 확인. 360px·768px·1280px에서 가로 넘침이 없음을 확인했다. 화면 기록은 이 문서와 같은 폴더의 `mission8-*.png` 파일에 있다.
