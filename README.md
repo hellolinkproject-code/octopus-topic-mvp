@@ -5,6 +5,7 @@
 - GitHub: https://github.com/hellolinkproject-code/octopus-topic-mvp
 - 서비스: https://octopus-topic-mvp.vercel.app
 - 상세 설계·검증 시나리오: [docs/MISSION8.md](docs/MISSION8.md)
+- 제출용 고도화 기능 설계 및 흐름 정의: [docs/MISSION8-DESIGN.md](docs/MISSION8-DESIGN.md)
 
 ## 선택한 고도화 기능
 

@@ -756,6 +756,7 @@ en.dashboard.writeReward = 'Question 53 +30P · Question 54 saves free'
 ko.premium = {
   ...ko.premium,
   badge: 'AI 맞춤 첨삭',
+  resultTitle: '54번 답안의 맞춤 첨삭을 받아 보세요',
   intro: '퀴즈와 53번 쓰기로 포인트를 모으고, 54번 답안의 맞춤 첨삭에 사용해요.',
   featureScore: '내용·구성·표현 피드백',
   featureRewrite: '다음 쓰기를 위한 연습 팁',
@@ -764,6 +765,7 @@ ko.premium = {
 en.premium = {
   ...en.premium,
   badge: 'AI FEEDBACK',
+  resultTitle: 'Get personal feedback on your Question 54 answer',
   intro:
     'Earn points with quizzes and Question 53, then use them for personal Question 54 feedback.',
   featureScore: 'Content, organization and language advice',

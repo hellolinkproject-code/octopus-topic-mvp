@@ -20,11 +20,16 @@ import { getWritingFeedback } from '../lib/writingFeedback'
 import { getWritingTaskNumber, isEssayTask } from '../lib/writingTask'
 
 export default function WriteAnswerPage() {
-  const navigate = useNavigate()
   const { questionNumber } = useParams()
+  const { user } = useApp()
+  const number = getWritingTaskNumber(questionNumber)
+  return <WritingEditor key={`${user.id}:${number}`} number={number} />
+}
+
+function WritingEditor({ number }) {
+  const navigate = useNavigate()
   const { t, path } = useLanguage()
   const { saveAnswer, user } = useApp()
-  const number = getWritingTaskNumber(questionNumber)
   const isEssay = isEssayTask(number)
   const writingPrompt = useMemo(() => getDailyWritingPrompt(number), [number])
   const feedback = useMemo(() => getWritingFeedback(writingPrompt), [writingPrompt])

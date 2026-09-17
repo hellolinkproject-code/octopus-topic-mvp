@@ -5,7 +5,8 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { LanguageProvider } from '../src/i18n/LanguageContext'
-import { getDailyQuiz } from '../src/lib/dailyContent'
+import { getDailyQuiz, getDailyWritingPrompt } from '../src/lib/dailyContent'
+import { getUserDraftKey } from '../src/lib/drafts'
 import QuizPage from '../src/pages/QuizPage'
 import WriteAnswerPage from '../src/pages/WriteAnswerPage'
 
@@ -96,6 +97,34 @@ describe('learning save UI', () => {
     expect(app.saveAnswer.mock.calls[0][0].content).toBe(content)
     expect((await screen.findByRole('button', { name: /저장 완료/ })).disabled).toBe(true)
   })
+
+  it.each(['', '이전에 작성한 54번 초안'])(
+    'opens an editable Question 54 after saving Question 53, with draft %s',
+    async (draft) => {
+      const content = '가'.repeat(200)
+      const prompt54 = getDailyWritingPrompt(54)
+      const draftKey = getUserDraftKey(app.user.id, 54, prompt54.dailyId)
+      if (draft) localStorage.setItem(draftKey, draft)
+      app.saveAnswer.mockResolvedValue({ id: 'graph-answer', content, earnedPoints: 30 })
+      renderRoute('/ko/writing/53/new', <WriteAnswerPage />, '/:lang/writing/:questionNumber/new')
+      const user = userEvent.setup()
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: content } })
+      await user.click(screen.getByRole('button', { name: /답안 저장/ }))
+      await user.click(await screen.findByRole('button', { name: '54번 답안 작성하기' }))
+      const editor = screen.getByRole('textbox', { name: '54번 논술 답안 작성' })
+      expect(editor.disabled).toBe(false)
+      expect(editor.value).toBe(draft)
+      expect(screen.queryByRole('button', { name: /저장 완료/ })).toBeNull()
+      fireEvent.change(editor, { target: { value: '나'.repeat(650) } })
+      await user.click(screen.getByRole('button', { name: /답안 저장/ }))
+      await waitFor(() => expect(app.saveAnswer).toHaveBeenCalledTimes(2))
+      expect(app.saveAnswer.mock.calls[1][0]).toMatchObject({
+        promptNumber: 54,
+        promptId: prompt54.id,
+        content: '나'.repeat(650),
+      })
+    },
+  )
 
   it('shows the server error when writing saving fails', async () => {
     app.saveAnswer.mockRejectedValue(new Error('답안 저장 실패'))
