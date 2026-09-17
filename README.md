@@ -6,6 +6,7 @@
 - 서비스: https://octopus-topic-mvp.vercel.app
 - 상세 설계·검증 시나리오: [docs/MISSION8.md](docs/MISSION8.md)
 - 제출용 고도화 기능 설계 및 흐름 정의: [docs/MISSION8-DESIGN.md](docs/MISSION8-DESIGN.md)
+- 최종 제출 점검표: [docs/MISSION8-CHECKLIST.md](docs/MISSION8-CHECKLIST.md)
 
 ## 선택한 고도화 기능
 
@@ -97,7 +98,7 @@ npx vercel
 npx vercel --prod
 ```
 
-자동 테스트의 OpenAI 호출은 모의 응답이며 실제 모델 품질·과금·자격 증명을 검증하지 않습니다. 실제 키로 배포 환경의 성공 시나리오를 별도로 확인해야 합니다. 검증 결과와 남은 조건은 `docs/MISSION8.md`에 기록합니다.
+자동 테스트의 OpenAI 호출은 모의 응답입니다. 2026-09-17에 별도로 운영 환경의 실제 OpenAI 호출, 결과 저장, 50P 차감, 재조회 시 추가 차감 없음을 API와 브라우저에서 확인했습니다. 최종 전체 테스트는 80개 통과했으며, 구체적인 검증 범위와 운영 한계는 `docs/MISSION8.md`와 `docs/MISSION8-CHECKLIST.md`에 기록합니다.
 
 ## 운영 전 남은 범위
 

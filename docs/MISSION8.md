@@ -57,14 +57,27 @@
 
 ## 검증 기록
 
+### 최종 점검 — 2026-09-17
+
+- **제출 가능:** Production의 `OPENAI_API_KEY` Secret 설정을 확인하고 재배포했다. 실제 OpenAI 호출 성공을 검증하여 기존 키 미설정 제한을 해소했다. 키 값은 문서·Git·클라이언트에 기록하지 않았다.
+- 실제 API: 퀴즈 동시 요청의 중복 보상 방지, 53번 30P 적립, 54번 무료 저장, 전송 동의 누락 거절, AI 결과 저장과 잔액 80P→30P, 동일 요청 시 `charged: false`와 잔액 30P 유지 확인.
+- 실제 브라우저: 로그인 후 원래 영어 대시보드 경로 복귀 → 한국어 퀴즈 50P → 53번 258자 저장 후 80P → 54번 652자 무료 저장 → 동의 → 로딩 → AI 결과 표시 및 30P 확인. 새로고침 후 `/api/me`에서도 결과와 잔액 30P가 유지됨을 확인했다. 사용 모델은 `gpt-4.1-mini`다.
+- 검증 중 53번 저장 직후 54번으로 이동할 때 이전 저장 상태로 입력이 잠기는 문제를 발견했다. 사용자·문항별 작성 컴포넌트를 분리하고, 빈 54번 입력 및 기존 54번 초안 복원에 대한 회귀 테스트 2개를 추가했다. 실제 운영 화면에서 수정 확인.
+- 수정 후 `npm test`: **14개 파일, 80개 테스트 모두 통과**. `npm run format:check`, `git diff --check`, Vercel 프로덕션 빌드 통과. 최초 전체 실행의 로그인 경로 대기 실패 1건은 별도 10개 재실행 및 최종 전체 80개 실행에서 재현되지 않았고, 실제 브라우저 경로 복귀도 확인했다.
+- 실제 AI 성공 화면을 360px·768px·1280px에서 확인했다. 모두 가로 넘침 없음. [모바일](mission8-live-feedback-360.png), [태블릿](mission8-live-feedback-768.png), [데스크톱](mission8-live-feedback-1280.png).
+- 수정 코드 커밋: `a3651c4`. 검증한 Production 배포: `dpl_AVGRA46LqBmKDUt42hf7q3odZdf1` ([배포 기록](https://vercel.com/eeiiii/octopus-topic-mvp/AVGRA46LqBmKDUt42hf7q3odZdf1)), 상태 READY. 서비스: https://octopus-topic-mvp.vercel.app.
+- [제출용 설계 및 흐름 문서](MISSION8-DESIGN.md), [최종 제출 점검표](MISSION8-CHECKLIST.md).
+
+### 초기 검증 이력 — API 키 설정 전
+
 - 최종 코드 Preview: https://octopus-topic-dnrz9r03j-eeiiii.vercel.app — 핵심 API 재검증 통과.
-- 운영 배포: https://octopus-topic-mvp.vercel.app — 랜딩 페이지 브라우저 접속과 동일한 핵심 API 검증 통과. 운영 배포 ID: `dpl_3TWZUhHWtKa6obqX9FDw9Cunf3iA`, 기능 코드 커밋: `ceae6ce`. 아래 OpenAI 키 미설정 제한이 남아 있다.
+- 초기 운영 배포: https://octopus-topic-mvp.vercel.app — 랜딩 페이지 브라우저 접속과 동일한 핵심 API 검증 통과. 초기 운영 배포 ID: `dpl_3TWZUhHWtKa6obqX9FDw9Cunf3iA`, 기능 코드 커밋: `ceae6ce`. 당시에는 OpenAI 키 미설정 제한이 있었다.
 - 자동 테스트: 기존 전체 76개 및 추가 상태 동기화 테스트 2개 통과. 최종 저장소 수정 후 관련 17개 테스트를 다시 통과했다. AI 성공·실패는 외부 응답을 모의한 테스트이며 실제 OpenAI 호출 성공을 의미하지 않는다.
 - 코드 검사: 프로덕션 빌드, 포맷 검사, `git diff --check` 통과.
 - 브라우저: 로그인 → 54번 650자 저장 → 첨삭 화면 이동, 동의 체크박스와 키보드 탐색, 포인트 부족 상태, 키 미설정 오류와 잔액 유지 확인. 360px·768px·1280px에서 가로 넘침이 없음을 확인했다. 화면 기록은 이 문서와 같은 폴더의 `mission8-*.png` 파일에 있다.
 - 실제 Vercel Preview API: 로그인, 동일 퀴즈 동시 요청의 중복 적립 방지, 53번 30P 적립, 54번 무료 저장·중복 저장, 동의 누락 거절, OpenAI 키 미설정 시 503과 차감 없음 확인.
 - Blob 동시 저장 검증에서 압축 응답의 ETag로 조건부 쓰기가 실패하는 문제를 발견했다. 읽기에 `Accept-Encoding: identity`를 지정해 강한 ETag를 얻도록 수정하고, 충돌 재시도에 짧은 지연을 추가했다. 실제 배포 API와 이를 재현한 저장소 테스트에서 검증했다.
-- **남은 검증:** Vercel에 `OPENAI_API_KEY`를 설정하고 재배포한 후 실제 모델의 첨삭 성공, 결과 저장, 50P 차감 및 재조회 시 추가 차감 없음을 확인해야 한다. 키 미설정 상태를 AI 기능 완료로 간주하지 않는다.
+- **당시 미완료였던 검증:** 실제 모델의 첨삭 성공, 결과 저장, 50P 차감 및 재조회 시 추가 차감 없음. 2026-09-17 최종 점검에서 완료했다.
 
 배포 API 재검증: `node scripts/smoke-api.mjs <배포 URL> --feedback`. 합성 테스트 계정과 학습 기록이 생성된다. 키가 있으면 실제 모델 호출이 발생하고, 키가 없으면 설정 오류와 잔액 유지를 검증한다.
 
