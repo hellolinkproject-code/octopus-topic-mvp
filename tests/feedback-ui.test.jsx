@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import FeedbackPanel from '../src/components/FeedbackPanel'
@@ -49,6 +49,51 @@ describe('Feedback request UI', () => {
       screen.getByRole('link', { name: '퀴즈·53번으로 포인트 모으기' }).getAttribute('href'),
     ).toBe('/ko/dashboard')
     expect(screen.getByRole('button', { name: '50P로 맞춤 첨삭받기' }).disabled).toBe(true)
+  })
+  it('keeps the same status region through loading and result completion', async () => {
+    const user = userEvent.setup()
+    let release
+    state.requestFeedback.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = resolve
+        }),
+    )
+    const view = show()
+    const status = screen.getByRole('status')
+    expect(status.textContent).toBe('')
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: '50P로 맞춤 첨삭받기' }))
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toContain('살펴보고')
+    view.rerender(
+      <MemoryRouter initialEntries={['/ko/answers/answer-a']}>
+        <LanguageProvider>
+          <FeedbackPanel
+            answer={{
+              ...answer,
+              aiFeedback: {
+                summary: '총평',
+                strengths: ['장점'],
+                improvements: ['개선'],
+                corrections: [],
+                nextSteps: ['연습'],
+                cost: 50,
+              },
+            }}
+          />
+        </LanguageProvider>
+      </MemoryRouter>,
+    )
+    // The result can reach context before the pending submit promise settles.
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toContain('첨삭 저장 완료')
+    await act(async () => {
+      release()
+    })
+    expect(screen.getAllByRole('status')).toHaveLength(1)
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toContain('첨삭 저장 완료')
   })
   it('shows a provider failure and allows a retry', async () => {
     const user = userEvent.setup()

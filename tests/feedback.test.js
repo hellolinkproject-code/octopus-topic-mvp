@@ -84,7 +84,15 @@ describe('Mission 8 feedback', () => {
     expect(request.text.format.strict).toBe(true)
   })
   it('prevents concurrent generation while allowing unrelated point awards', async () => {
-    const id = await seed()
+    const id = await seed(
+      100,
+      ['answer-a', 'answer-b'].map((id) => ({
+        id,
+        promptNumber: 54,
+        promptId: 'digital-literacy',
+        content,
+      })),
+    )
     let release
     let started
     const entered = new Promise((resolve) => {
@@ -99,6 +107,7 @@ describe('Mission 8 feedback', () => {
     const first = requestFeedback(id, 'answer-a')
     await entered
     await expect(requestFeedback(id, 'answer-a')).rejects.toMatchObject({ code: 'FEEDBACK_BUSY' })
+    await expect(requestFeedback(id, 'answer-b')).rejects.toMatchObject({ code: 'FEEDBACK_BUSY' })
     await updateUser(id, (user) => ({ ...user, points: user.points + 30 }))
     release({ ok: true, json: async () => providerPayload() })
     await first
@@ -136,11 +145,44 @@ describe('Mission 8 feedback', () => {
     await expect(requestFeedback(id, 'answer-a')).rejects.toMatchObject({ code })
     expect((await readUser(id)).points).toBe(100)
   })
-  it('handles a timeout without charging', async () => {
+  it.each([
+    ['timeout', new DOMException('timeout', 'TimeoutError'), 504, 'AI_TIMEOUT'],
+    ['abort', new DOMException('aborted', 'AbortError'), 504, 'AI_TIMEOUT'],
+    [
+      'DNS failure',
+      new TypeError('fetch failed', { cause: { code: 'ENOTFOUND' } }),
+      503,
+      'AI_UNREACHABLE',
+    ],
+    [
+      'TLS failure',
+      new TypeError('fetch failed', { cause: { code: 'CERT_HAS_EXPIRED' } }),
+      503,
+      'AI_UNREACHABLE',
+    ],
+  ])('classifies %s without charging and permits retry', async (_, error, status, code) => {
+    const log = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const id = await seed()
-    fetch.mockRejectedValueOnce(new DOMException('timeout', 'TimeoutError'))
-    await expect(requestFeedback(id, 'answer-a')).rejects.toMatchObject({ code: 'AI_TIMEOUT' })
-    expect((await readUser(id)).points).toBe(100)
+    fetch.mockRejectedValueOnce(error)
+    const token = await createAccessToken(id)
+    const res = response()
+    await feedbackHandler(
+      {
+        method: 'POST',
+        headers: { authorization: `Bearer ${token}` },
+        body: { answerId: 'answer-a', consent: true },
+      },
+      res,
+    )
+    expect(res.statusCode).toBe(status)
+    expect(res.body.error.code).toBe(code)
+    expect(log).toHaveBeenCalledExactlyOnceWith('AI provider connection failed', { code, status })
+    const saved = await readUser(id)
+    expect(saved.points).toBe(100)
+    expect(saved.feedbackJob).toBeNull()
+    expect(saved.answers[0].aiFeedback).toBeUndefined()
+    await requestFeedback(id, 'answer-a')
+    expect((await readUser(id)).points).toBe(50)
   })
   it('accepts a useful response with no sentence corrections', async () => {
     const id = await seed()

@@ -49,8 +49,11 @@ export default function FeedbackPanel({ answer }) {
         <h2 id="feedback-title">{t('feedback.title')}</h2>
         <p>{t('feedback.disclaimer')}</p>
       </div>
+      <p className="sr-only" role="status" aria-atomic="true">
+        {result ? t('feedback.saved') : busy ? t('feedback.wait') : ''}
+      </p>
       {result ? (
-        <div className="feedback-result" aria-live="polite" lang="ko">
+        <div className="feedback-result" lang="ko">
           <p className="feedback-receipt">
             {t('feedback.saved')} · {result.cost}P
           </p>
@@ -137,7 +140,7 @@ export default function FeedbackPanel({ answer }) {
               {t('feedback.refresh')}
             </Button>
           </div>
-          <p role="status">{busy ? t('feedback.wait') : ''}</p>
+          <p aria-hidden="true">{busy ? t('feedback.wait') : ''}</p>
           {error ? (
             <p className="field-error" role="alert">
               {error}

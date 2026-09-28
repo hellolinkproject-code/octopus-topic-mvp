@@ -54,11 +54,23 @@ export async function generateFeedback(answer, prompt) {
         },
       },
     }),
-  }).catch(() => {
+  }).catch((error) => {
+    const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError'
+    // Keep operational diagnostics useful without logging provider errors or request data.
+    console.warn('AI provider connection failed', {
+      code: timedOut ? 'AI_TIMEOUT' : 'AI_UNREACHABLE',
+      status: timedOut ? 504 : 503,
+    })
+    if (timedOut)
+      throw apiError(
+        504,
+        'AI_TIMEOUT',
+        '첨삭 서비스 연결이 지연되었습니다. 잠시 후 다시 시도해 주세요.',
+      )
     throw apiError(
-      504,
-      'AI_TIMEOUT',
-      '첨삭 서비스 연결이 지연되었습니다. 잠시 후 다시 시도해 주세요.',
+      503,
+      'AI_UNREACHABLE',
+      '첨삭 서비스에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
     )
   })
   if (!response.ok)
@@ -177,6 +189,8 @@ export async function requestFeedback(userId, answerId) {
           'FEEDBACK_EXPIRED',
           '이 요청의 처리 시간이 만료되었습니다. 결과를 새로 확인해 주세요.',
         )
+      // Feedback is currently the only debit; the user-wide job blocks other feedback spending.
+      // Future debit features must honor that reservation before spending these points.
       if (user.points < FEEDBACK_COST)
         throw apiError(409, 'INSUFFICIENT_POINTS', '포인트가 부족하여 첨삭을 저장하지 못했습니다.')
       return {
