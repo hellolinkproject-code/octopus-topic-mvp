@@ -1,3 +1,4 @@
+import { TeacherCta } from '../components/CorrectionShared'
 import { ArrowLeft, CalendarDays, FileText, PenLine } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../components/Layout'
@@ -58,6 +59,7 @@ export default function AnswerDetailPage() {
           <article>{answer.content}</article>
         </Card>
         {answer.promptNumber === 54 ? <FeedbackPanel key={answer.id} answer={answer} /> : null}
+        <TeacherCta question={answer.promptNumber} />
         <div className="detail-actions">
           <Button variant="outline" onClick={() => navigate(path('/answers'))}>
             {t('answers.back')}

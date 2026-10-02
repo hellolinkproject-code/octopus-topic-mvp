@@ -6,6 +6,8 @@ import me from '../api/me.js'
 import answers from '../api/answers.js'
 import quiz from '../api/quiz-attempts.js'
 import feedback from '../api/feedback.js'
+import corrections from '../api/corrections.js'
+import adminCorrections from '../api/admin-corrections.js'
 
 // Local development only. Production continues to use Vercel Functions.
 process.env.JWT_SECRET ||= randomBytes(48).toString('base64url')
@@ -16,6 +18,8 @@ const routes = {
   '/api/answers': answers,
   '/api/quiz-attempts': quiz,
   '/api/feedback': feedback,
+  '/api/corrections': corrections,
+  '/api/admin-corrections': adminCorrections,
 }
 const server = createServer(async (request, response) => {
   const handler = routes[new URL(request.url, 'http://localhost').pathname]
@@ -34,7 +38,7 @@ const server = createServer(async (request, response) => {
     let body = ''
     for await (const chunk of request) {
       body += chunk
-      if (Buffer.byteLength(body) > 16384)
+      if (Buffer.byteLength(body) > (request.url.startsWith('/api/corrections') || request.url.startsWith('/api/admin-corrections') ? 4400000 : 16384))
         return response.status(413).json({ error: { message: '입력 내용이 너무 큽니다.' } })
     }
     request.body = body ? JSON.parse(body) : undefined

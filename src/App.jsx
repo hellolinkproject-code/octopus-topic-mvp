@@ -15,6 +15,9 @@ import WritingHomePage from './pages/WritingHomePage'
 import AnswersPage from './pages/AnswersPage'
 import AnswerDetailPage from './pages/AnswerDetailPage'
 import NotFoundPage from './pages/NotFoundPage'
+import CorrectionPage from './pages/CorrectionPage'
+import CorrectionCompletePage from './pages/CorrectionCompletePage'
+import AdminCorrectionsPage from './pages/AdminCorrectionsPage'
 const protect = (page) => <ProtectedRoute>{page}</ProtectedRoute>
 function LanguageRoute({ children }) {
   const { lang } = useParams()
@@ -48,8 +51,12 @@ export default function App() {
   const { t, path } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
-  if (isInitializing) return <LoadingScreen />
-  if (restoreError) {
+  const independentRoute =
+    /^\/(ko|en|zh|vi|mn|ja)\/(correction(?:\/|$)|admin\/corrections(?:\/|$))/.test(
+      location.pathname,
+    )
+  if (isInitializing && !independentRoute) return <LoadingScreen />
+  if (restoreError && !independentRoute) {
     const loginAgain = () => {
       const from = `${location.pathname}${location.search}${location.hash}`
       logout()
@@ -77,6 +84,12 @@ export default function App() {
       <Route path="/writing/*" element={<LegacyRedirect />} />
       <Route path="/answers/*" element={<LegacyRedirect />} />
       <Route path="/:lang/" element={localized(<LandingPage />)} />
+      <Route path="/:lang/correction" element={localized(<CorrectionPage />)} />
+      <Route
+        path="/:lang/correction/complete/:orderId"
+        element={localized(<CorrectionCompletePage />)}
+      />
+      <Route path="/:lang/admin/corrections" element={localized(<AdminCorrectionsPage />)} />
       <Route path="/:lang/login" element={localized(<LoginPage />)} />
       <Route path="/:lang/dashboard" element={localized(protect(<DashboardPage />))} />
       <Route path="/:lang/quiz/today" element={localized(protect(<QuizPage />))} />

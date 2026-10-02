@@ -1,4 +1,15 @@
-# 옥토퍼스 토픽 — Sprint Mission 8
+# 옥토퍼스 TOPIK — TOPIK Writing Coach
+
+**AI 쓰기 연습과 한국어 선생님의 TOPIK II 53·54번 PDF 첨삭을 제공하는 서비스**
+
+## Teacher Correction MVP
+
+로그인 없이 53번·54번·세트 첨삭 신청 → 계좌이체 → 관리자 입금 확인 → 교사 PDF 첨삭 → Gmail 수동 발송을 지원합니다. 기존 무료 학습과 내부 포인트 기반 54번 AI 첨삭은 유지합니다.
+
+- [신규 route·API·env·데이터 구조·운영 절차](docs/TEACHER-CORRECTION.md)
+- [구현 및 검증 결과](docs/TEACHER-CORRECTION-RESULT.md)
+
+## 기존 Mission 6–8 기록
 
 **퀴즈 → 53번 그래프 쓰기 → 학습 포인트로 54번 AI 맞춤 첨삭**
 

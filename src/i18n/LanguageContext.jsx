@@ -37,10 +37,18 @@ export function LanguageProvider({ children }) {
     const isLanding = location.pathname === canonicalPath || location.pathname === `/${language}`
     const origin = 'https://octopus-topic-mvp.vercel.app'
     document.documentElement.lang = localeMap[language]
-    document.title = t('meta.title')
+    document.title =
+      language === 'ko'
+        ? '옥토퍼스 TOPIK — TOPIK Writing Coach'
+        : 'Octopus TOPIK — TOPIK Writing Coach'
     document
       .querySelector('meta[name="description"]')
-      ?.setAttribute('content', t('meta.description'))
+      ?.setAttribute(
+        'content',
+        language === 'ko'
+          ? 'AI 쓰기 연습과 한국어 선생님의 TOPIK II 53·54번 PDF 첨삭을 제공하는 서비스'
+          : 'Practice TOPIK II Questions 53 and 54 with AI and receive PDF corrections from a Korean teacher.',
+      )
     let canonical = document.querySelector('link[rel="canonical"]')
     if (!canonical) {
       canonical = document.createElement('link')

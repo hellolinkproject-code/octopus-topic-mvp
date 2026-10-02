@@ -1,3 +1,4 @@
+import { TeacherCta } from '../components/CorrectionShared'
 import {
   ArrowLeft,
   CheckCircle2,
@@ -304,6 +305,7 @@ function WritingEditor({ number }) {
             </div>
           </section>
         ) : null}
+        {savedAnswer ? <TeacherCta question={number} /> : null}
       </main>
     </Layout>
   )

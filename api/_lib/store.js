@@ -1,9 +1,10 @@
+import { storagePath } from './storageNamespace.js'
 import { BlobPreconditionFailedError, get, put } from '@vercel/blob'
 
 const memory = new Map()
 
 function pathname(userId) {
-  return `users/${userId}.json`
+  return storagePath(`users/${userId}.json`)
 }
 
 function useMemoryStore() {

@@ -1,3 +1,4 @@
+import { correctionCopy } from '../i18n/correctionCopy'
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
@@ -7,7 +8,7 @@ import { useApp } from '../context/AppContext'
 import { useLanguage } from '../i18n/LanguageContext'
 export default function LoginPage() {
   const { user, login } = useApp()
-  const { t, path } = useLanguage()
+  const { t, path, language } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
@@ -43,8 +44,7 @@ export default function LoginPage() {
           <p>{t('login.subtitle')}</p>
           <img className="auth-mascot" src="/assets/mascot-habit.png" alt={t('login.alt')} />
           <div className="quote-card">
-            <span className="preserve-lines quote-text">{t('login.quote')}</span>
-            <span>{t('login.quoteBy')}</span>
+            <span className="preserve-lines quote-text">{correctionCopy(language).neutral}</span>
           </div>
         </div>
         <Card className="auth-card">
