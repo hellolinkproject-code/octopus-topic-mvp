@@ -109,3 +109,12 @@ correction-reports/{randomOrderUuid}/{randomFileUuid}.pdf
 ## Preview 데이터 격리
 
 Production과 Preview에 같은 Blob 연결이 설정되어 있어 Preview에서는 모든 학습·첨삭 저장 경로 앞에 `preview/{SHA256(branch)의 앞 20자리}/`를 붙인다. 동일 브랜치 재배포 간에는 경로가 유지되며 production 경로는 변경하지 않는다. `VERCEL_ENV=preview`인데 `VERCEL_GIT_COMMIT_REF`가 없으면 저장을 중단한다. CLI Preview 배포도 해당 feature branch 메타데이터가 있어야 한다.
+
+## 2026-10-06 문제·답안 연결 보완
+
+- 저장 완료 화면과 답안 상세의 선생님 첨삭 CTA가 `answerId`를 전달한다. 신청 화면은 현재 계정의 저장 답안을 복원한 뒤 `promptId`로 원래 문제를 찾고 문제·답안을 자동 입력한다. 날짜가 달라도 오늘의 문제로 대체하지 않는다.
+- 직접 신청 시 53·54번 서비스 문제 선택 목록을 제공한다. 53번에는 시리즈명·모든 그래프 수치·자료 출처, 54번에는 주제·설명·질문을 포함한다. 외부 문제 직접 입력과 제출 전 수정도 가능하다.
+- 선택한 답안이나 원문을 찾지 못하면 안내하고, 다른 문제를 임의로 연결하지 않는다. 문제 선택 변경 시 이전 답안·첨부파일을 초기화한다.
+- 코드 커밋: `ee6d55d`. Preview: https://octopus-topic-ebo7cnyjb-eeiiii.vercel.app/ko/correction (Ready).
+- 검증: 18개 테스트 파일 / 126개 테스트 통과, format check 및 build 통과. 배포 화면에서 360·768·1280px, 외부 문제, 저장 답안 CTA, 새로고침 복원, 신청 payload의 원래 문제·답안, 영어 화면 등 8개 브라우저 확인 통과; 페이지 오류 0.
+- 이번 브라우저 검증의 세션 복원·신청 API는 테스트 데이터로 가로채 확인했다. 실제 고객 주문·입금·메일 전송은 하지 않았다. 기존 실제 Blob 검증과 AI 환경 제한은 `TEACHER-CORRECTION-PREVIEW-RESULT.md` 참조. Production 배포나 main 병합은 하지 않았다.
