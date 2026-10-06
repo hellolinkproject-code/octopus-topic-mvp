@@ -1,3 +1,4 @@
+import { additionalGraphPrompts, additionalEssayPrompts } from './additionalWritingPrompts.js'
 import { WRITING_TASK } from '../lib/writingTask.js'
 
 const series = (first, second) => [
@@ -225,6 +226,7 @@ export const writingPromptBank = [
       '증가 폭이 가장 큰 연령대는 어디인가?',
     ],
   ),
+  ...additionalGraphPrompts.map((args) => graphPrompt(...args)),
 ]
 
 const essayPrompt = (id, title, topic, questions, outline) => ({
@@ -541,6 +543,7 @@ export const essayPromptBank = [
       '교육과 전환 지원 및 활용 원칙 제안',
     ],
   ),
+  ...additionalEssayPrompts.map((args) => essayPrompt(...args)),
 ]
 
 export const weeklyActivity = [

@@ -27,6 +27,8 @@ beforeEach(() => {
       removeItem: (k) => storage.delete(k),
     },
   })
+  sessionStorage.clear()
+  vi.spyOn(Math, 'random').mockReturnValue(0)
   global.fetch = vi.fn()
 })
 afterEach(() => {
@@ -86,14 +88,13 @@ it('provides service problem data and supports an external problem', async () =>
   const question = await screen.findByLabelText('53 · 문제 내용 또는 문제 설명')
   expect(question.value).toContain('2020년: 74')
   expect(question.value).toContain('60대')
-  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), {
-    target: { value: 'prompt:transport' },
-  })
+  fireEvent.click(screen.getByRole('button', { name: '53 · 다른 랜덤 문제 받기' }))
   expect(question.value).toContain('편리성: 2021년: 62')
-  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), { target: { value: 'external' } })
-  expect(question.value).toBe('')
-  fireEvent.change(question, { target: { value: '외부 문제 원문' } })
-  expect(question.value).toBe('외부 문제 원문')
+  fireEvent.change(screen.getByLabelText('53 · 답안 작성 방식'), { target: { value: 'external' } })
+  const externalQuestion = screen.getByLabelText('53 · 문제 내용 또는 문제 설명')
+  expect(externalQuestion.value).toBe('')
+  fireEvent.change(externalQuestion, { target: { value: '외부 문제 원문' } })
+  expect(externalQuestion.value).toBe('외부 문제 원문')
 })
 
 it('restores the linked answer and its exact original problem after async session loading', async () => {
@@ -139,7 +140,10 @@ it('restores the linked answer and its exact original problem after async sessio
   expect(screen.getByLabelText('53 · 문제 내용 또는 문제 설명').value).toContain(
     '쾌적성: 2021년: 48, 2025년: 71',
   )
-  expect(screen.getByLabelText('53 · 문제 선택').value).toBe('answer:saved-original')
+  expect(screen.getByLabelText('53 · 내가 저장한 답안').value).toBe('answer:saved-original')
+  fireEvent.click(screen.getByRole('radio', { name: /TOPIK 53·54번 세트/ }))
+  expect(screen.getByLabelText('54 · 답안 작성 방식').value).toBe('random')
+  expect(screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value).toContain('TOPIK II 54')
 })
 
 it('does not substitute a different service problem when the linked answer is unavailable', async () => {
@@ -155,23 +159,53 @@ it('renders the selected 53 graph and hides it for an external problem', async (
     name: /연령대별 온라인 쇼핑 이용률 변화.*20대: 2020년 74%/,
   })
   expect(graph.querySelectorAll('.exam-graph-bar')).toHaveLength(6)
-  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), {
-    target: { value: 'prompt:transport' },
-  })
+  fireEvent.click(screen.getByRole('button', { name: '53 · 다른 랜덤 문제 받기' }))
   expect(
     screen.getByRole('img', { name: /대중교통 만족도 변화.*쾌적성: 2021년 48%, 2025년 71%/ }),
   ).toBeTruthy()
-  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), { target: { value: 'external' } })
+  fireEvent.change(screen.getByLabelText('53 · 답안 작성 방식'), { target: { value: 'external' } })
   expect(document.querySelector('.exam-graph')).toBeNull()
 })
 
-it('offers all 20 original essay problems with their task questions', async () => {
+it('assigns a random essay without a problem list and keeps the question read-only', async () => {
   show('/ko/correction')
-  const source = await screen.findByLabelText('54 · 문제 선택')
-  expect(source.querySelectorAll('optgroup[label="서비스 연습 문제"] option')).toHaveLength(20)
-  fireEvent.change(source, { target: { value: 'prompt:ai-human-role' } })
-  const problem = screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value
-  expect(problem).toContain('인공지능 시대의 인간 역할')
-  expect(problem).toContain('개인과 사회는 무엇을 준비해야 하는가?')
-  expect(problem).toContain('600~700자')
+  const source = await screen.findByLabelText('54 · 답안 작성 방식')
+  expect(source.querySelectorAll('option')).toHaveLength(2)
+  expect(source.value).toBe('random')
+  const problem = screen.getByLabelText('54 · 문제 내용 또는 문제 설명')
+  expect(problem.readOnly).toBe(true)
+  const original = problem.value
+  fireEvent.click(screen.getByRole('button', { name: '54 · 다른 랜덤 문제 받기' }))
+  expect(problem.value).not.toBe(original)
+  expect(problem.value).toContain('600~700자')
+})
+
+it('protects a written answer before rerolling and can cancel or confirm', async () => {
+  show('/ko/correction')
+  const problem = await screen.findByLabelText('54 · 문제 내용 또는 문제 설명')
+  const original = problem.value
+  const answer = screen.getByLabelText('54 · 답안 직접 입력')
+  fireEvent.change(answer, { target: { value: '작성 중인 답안' } })
+  fireEvent.click(screen.getByRole('button', { name: '54 · 다른 랜덤 문제 받기' }))
+  expect(screen.getByRole('alert').textContent).toContain('초기화')
+  expect(problem.value).toBe(original)
+  expect(answer.value).toBe('작성 중인 답안')
+  fireEvent.click(screen.getByRole('button', { name: '현재 문제 유지' }))
+  expect(screen.queryByRole('alert')).toBeNull()
+  expect(answer.value).toBe('작성 중인 답안')
+  fireEvent.click(screen.getByRole('button', { name: '54 · 다른 랜덤 문제 받기' }))
+  fireEvent.click(screen.getByRole('button', { name: '문제 바꾸기', exact: true }))
+  expect(problem.value).not.toBe(original)
+  expect(answer.value).toBe('')
+})
+
+it('keeps the assigned problem across a form remount and product switching', async () => {
+  const view = show('/ko/correction')
+  const original = (await screen.findByLabelText('54 · 문제 내용 또는 문제 설명')).value
+  fireEvent.click(screen.getByRole('radio', { name: /TOPIK 53번 첨삭/ }))
+  fireEvent.click(screen.getByRole('radio', { name: /TOPIK 54번 첨삭/ }))
+  expect(screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value).toBe(original)
+  view.unmount()
+  show('/ko/correction')
+  expect((await screen.findByLabelText('54 · 문제 내용 또는 문제 설명')).value).toBe(original)
 })

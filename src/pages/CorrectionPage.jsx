@@ -12,6 +12,7 @@ import {
   correctionPrompts,
   correctionQuestionText,
   correctionSavedAnswer,
+  randomCorrectionAnswer,
 } from '../lib/correctionPrompts'
 export default function CorrectionPage() {
   const { language, path } = useLanguage(),
@@ -37,19 +38,14 @@ export default function CorrectionPage() {
     depositorName: '',
   })
   const [answers, setAnswers] = useState(() => ({
-    53: {
-      source: linkedId ? 'external' : `prompt:${correctionPrompts(53)[0].id}`,
-      questionText: linkedId ? '' : correctionQuestionText(correctionPrompts(53)[0]),
-      answerText: '',
-      file: null,
-    },
-    54: {
-      source: linkedId ? 'external' : `prompt:${correctionPrompts(54)[0].id}`,
-      questionText: linkedId ? '' : correctionQuestionText(correctionPrompts(54)[0]),
-      answerText: '',
-      file: null,
-    },
+    53: linkedId
+      ? { source: 'external', questionText: '', answerText: '', file: null }
+      : randomCorrectionAnswer(53),
+    54: linkedId
+      ? { source: 'external', questionText: '', answerText: '', file: null }
+      : randomCorrectionAnswer(54),
   }))
+  const [pendingChange, setPendingChange] = useState(null)
   useEffect(() => {
     if (!linkedId || linkedApplied.current || isInitializing) return
     linkedApplied.current = true
@@ -60,24 +56,41 @@ export default function CorrectionPage() {
       setAnswers((current) => ({
         ...current,
         [answer.promptNumber]: correctionSavedAnswer(answer),
+        [answer.promptNumber === 53 ? 54 : 53]: randomCorrectionAnswer(
+          answer.promptNumber === 53 ? 54 : 53,
+        ),
       }))
       if (query.get('product') !== 'bundle') setProduct(`q${answer.promptNumber}`)
     }
   }, [linkedId, savedAnswers, isInitializing, query])
-  function selectSource(n, source) {
+  function applySource(n, source) {
     linkedApplied.current = true
-    if (source.startsWith('answer:')) {
+    let next
+    if (source === 'random') {
+      next = randomCorrectionAnswer(
+        n,
+        answers[n].source.startsWith('prompt:') ? answers[n].source.slice(7) : undefined,
+      )
+    } else if (source.startsWith('answer:')) {
       const answer = savedAnswers.find(
         (item) => `answer:${item.id}` === source && item.promptNumber === n,
       )
-      if (answer) setAnswers((current) => ({ ...current, [n]: correctionSavedAnswer(answer) }))
-      return
+      if (!answer) return
+      next = correctionSavedAnswer(answer)
+    } else {
+      next = { source: 'external', questionText: '', answerText: '', file: null }
     }
-    const prompt = correctionPrompts(n).find((item) => `prompt:${item.id}` === source)
-    setAnswers((current) => ({
-      ...current,
-      [n]: { source, questionText: correctionQuestionText(prompt), answerText: '', file: null },
-    }))
+    setAnswers((current) => ({ ...current, [n]: next }))
+    setPendingChange(null)
+  }
+  function selectSource(n, source) {
+    if (
+      answers[n].answerText.trim() ||
+      answers[n].file ||
+      (answers[n].source === 'external' && answers[n].questionText.trim())
+    ) {
+      setPendingChange({ number: n, source })
+    } else applySource(n, source)
   }
   const [consent, setConsent] = useState(false),
     [busy, setBusy] = useState(false),
@@ -85,15 +98,33 @@ export default function CorrectionPage() {
   const attempt = useRef(null),
     submitting = useRef(false)
   const product = CORRECTION_PRODUCTS[productId]
-  const graphSource = answers[53].source
-  const graphPromptId = graphSource.startsWith('answer:')
-    ? savedAnswers.find((answer) => `answer:${answer.id}` === graphSource)?.promptId
-    : graphSource.startsWith('prompt:')
-      ? graphSource.slice(7)
-      : null
-  const graphPrompt = correctionPrompts(53).find((prompt) => prompt.id === graphPromptId)
+  function providedPrompt(n) {
+    const source = answers[n].source
+    const promptId = source.startsWith('answer:')
+      ? savedAnswers.find((answer) => `answer:${answer.id}` === source)?.promptId
+      : source.startsWith('prompt:')
+        ? source.slice(7)
+        : null
+    return correctionPrompts(n).find((prompt) => prompt.id === promptId)
+  }
+  const graphPrompt = providedPrompt(53)
+  const essayPrompt = providedPrompt(54)
   const setAnswer = (n, key, value) =>
     setAnswers((current) => ({ ...current, [n]: { ...current[n], [key]: value } }))
+  const problemField = (n) => (
+    <Textarea
+      label={`${n} · ${c.question}`}
+      required
+      readOnly={Boolean(providedPrompt(n))}
+      maxLength={10000}
+      rows={5}
+      value={answers[n].questionText}
+      onChange={(e) => {
+        linkedApplied.current = true
+        setAnswer(n, 'questionText', e.target.value)
+      }}
+    />
+  )
   async function submit(event) {
     event.preventDefault()
     if (submitting.current) return
@@ -224,31 +255,68 @@ export default function CorrectionPage() {
                   {n} · {c.problemSource}
                 </span>
                 <select
-                  value={answers[n].source}
+                  value={
+                    answers[n].source.startsWith('prompt:')
+                      ? 'random'
+                      : answers[n].source.startsWith('answer:')
+                        ? 'saved'
+                        : 'external'
+                  }
                   disabled={Boolean(linkedId && isInitializing)}
-                  onChange={(e) => selectSource(n, e.target.value)}
+                  onChange={(e) =>
+                    selectSource(
+                      n,
+                      e.target.value === 'saved'
+                        ? `answer:${savedAnswers.find((answer) => answer.promptNumber === n).id}`
+                        : e.target.value,
+                    )
+                  }
                 >
-                  <optgroup label={c.serviceProblems}>
-                    {correctionPrompts(n).map((prompt) => (
-                      <option key={prompt.id} value={`prompt:${prompt.id}`}>
-                        {prompt.title}
-                      </option>
-                    ))}
-                  </optgroup>
+                  <option value="random">{c.randomProblem}</option>
                   {savedAnswers.some((answer) => answer.promptNumber === n) ? (
-                    <optgroup label={c.savedAnswers}>
-                      {savedAnswers
-                        .filter((answer) => answer.promptNumber === n)
-                        .map((answer) => (
-                          <option key={answer.id} value={`answer:${answer.id}`}>
-                            {answer.title} · {answer.promptDate || answer.createdAt?.slice(0, 10)}
-                          </option>
-                        ))}
-                    </optgroup>
+                    <option value="saved">{c.savedAnswers}</option>
                   ) : null}
                   <option value="external">{c.externalProblem}</option>
                 </select>
               </label>
+              {answers[n].source.startsWith('answer:') ? (
+                <label className="field">
+                  <span className="field-label">
+                    {n} · {c.savedAnswers}
+                  </span>
+                  <select
+                    value={answers[n].source}
+                    onChange={(e) => selectSource(n, e.target.value)}
+                  >
+                    {savedAnswers
+                      .filter((answer) => answer.promptNumber === n)
+                      .map((answer) => (
+                        <option key={answer.id} value={`answer:${answer.id}`}>
+                          {answer.title} · {answer.promptDate || answer.createdAt?.slice(0, 10)}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              ) : null}
+              {answers[n].source.startsWith('prompt:') ? (
+                <div className="random-problem-controls">
+                  <p role="status">{c.randomAssigned}</p>
+                  <Button type="button" variant="outline" onClick={() => selectSource(n, 'random')}>
+                    {n} · {c.randomNext}
+                  </Button>
+                </div>
+              ) : null}
+              {pendingChange?.number === n ? (
+                <div className="random-problem-confirm">
+                  <p role="alert">{c.resetAnswerWarning}</p>
+                  <Button type="button" onClick={() => applySource(n, pendingChange.source)}>
+                    {c.confirmProblemChange}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setPendingChange(null)}>
+                    {c.cancelProblemChange}
+                  </Button>
+                </div>
+              ) : null}
               <p>{c.problemHint}</p>
               {n === 53 && graphPrompt ? (
                 <>
@@ -256,20 +324,30 @@ export default function CorrectionPage() {
                   <p>{c.graphSourceNote}</p>
                 </>
               ) : null}
+              {n === 54 && essayPrompt ? (
+                <section className="exam-essay-question">
+                  <h2>{essayPrompt.title}</h2>
+                  <p>{essayPrompt.topic}</p>
+                  <p>{essayPrompt.description}</p>
+                  <ol>
+                    {essayPrompt.questions.map((question) => (
+                      <li key={question}>{question}</li>
+                    ))}
+                  </ol>
+                  <small>{essayPrompt.source}</small>
+                </section>
+              ) : null}
               {answers[n].source.startsWith('answer:') && !answers[n].questionText ? (
                 <p role="status">{c.originalMissing}</p>
               ) : null}
-              <Textarea
-                label={`${n} · ${c.question}`}
-                required
-                maxLength={10000}
-                rows={5}
-                value={answers[n].questionText}
-                onChange={(e) => {
-                  linkedApplied.current = true
-                  setAnswer(n, 'questionText', e.target.value)
-                }}
-              />
+              {providedPrompt(n) ? (
+                <details className="random-problem-text">
+                  <summary>{c.originalProblemText}</summary>
+                  {problemField(n)}
+                </details>
+              ) : (
+                problemField(n)
+              )}
               <Textarea
                 label={`${n} · ${c.answer}`}
                 maxLength={10000}

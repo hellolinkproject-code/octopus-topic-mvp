@@ -166,3 +166,14 @@ body{background:#fff;color:var(--ink)}
   .exam-graph { padding: 20px 8px; }
   .exam-graph-bars { padding-inline: 4px; gap: 5px; }
 }
+.random-problem-controls, .random-problem-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 18px; }
+.random-problem-controls p, .random-problem-confirm p { width: 100%; margin: 0; }
+.random-problem-confirm { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #faf7ff; }
+.exam-essay-question { margin-block: 24px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.exam-essay-question h2 { font-size: 20px; line-height: 1.5; margin-bottom: 14px; }
+.exam-essay-question p, .exam-essay-question li { font-size: 16px; line-height: 1.8; }
+.exam-essay-question ol { padding-left: 24px; }
+.exam-essay-question li + li { margin-top: 10px; }
+.exam-essay-question small { display: block; font-size: 14px; line-height: 1.6; margin-top: 16px; }
+.random-problem-text { margin-block: 18px; }
+.random-problem-text summary { cursor: pointer; padding-block: 12px; font-size: 16px; }

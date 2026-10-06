@@ -54,7 +54,7 @@ describe('daily problem bank selection', () => {
     expect(today.number).toBe(53)
     expect(today.minCharacters).toBe(200)
     expect(today.maxCharacters).toBe(300)
-    expect(writingPromptBank).toHaveLength(12)
+    expect(writingPromptBank).toHaveLength(60)
   })
 
   it('rotates original 54 prompts in the official long-form format', () => {
@@ -65,8 +65,8 @@ describe('daily problem bank selection', () => {
     expect(today.maxCharacters).toBe(700)
     expect(today.questions).toHaveLength(3)
     expect(tomorrow.id).not.toBe(today.id)
-    expect(essayPromptBank).toHaveLength(20)
-    expect(new Set(essayPromptBank.map((prompt) => prompt.id)).size).toBe(20)
+    expect(essayPromptBank).toHaveLength(60)
+    expect(new Set(essayPromptBank.map((prompt) => prompt.id)).size).toBe(60)
     for (const prompt of essayPromptBank) {
       expect(prompt.questions).toHaveLength(3)
       expect(prompt.outline).toHaveLength(3)
