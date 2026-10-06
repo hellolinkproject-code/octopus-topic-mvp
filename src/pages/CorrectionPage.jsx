@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { Button, Input, Textarea } from '../components/ui'
@@ -6,6 +6,12 @@ import { useLanguage } from '../i18n/LanguageContext'
 import { correctionCopy } from '../i18n/correctionCopy'
 import { CORRECTION_PRODUCTS, productName, priceLabel } from '../lib/correctionProducts'
 import { correctionRequest, prepareFile } from '../lib/correctionApi'
+import { useApp } from '../context/AppContext'
+import {
+  correctionPrompts,
+  correctionQuestionText,
+  correctionSavedAnswer,
+} from '../lib/correctionPrompts'
 export default function CorrectionPage() {
   const { language, path } = useLanguage(),
     c = correctionCopy(language)
@@ -18,6 +24,9 @@ export default function CorrectionPage() {
         ? 'q53'
         : 'q54',
   )
+  const { answers: savedAnswers, isInitializing } = useApp()
+  const linkedId = query.get('answerId')
+  const linkedApplied = useRef(false)
   const [customer, setCustomer] = useState({
     name: '',
     email: '',
@@ -26,10 +35,49 @@ export default function CorrectionPage() {
     examDate: '',
     depositorName: '',
   })
-  const [answers, setAnswers] = useState({
-    53: { questionText: '', answerText: '', file: null },
-    54: { questionText: '', answerText: '', file: null },
-  })
+  const [answers, setAnswers] = useState(() => ({
+    53: {
+      source: linkedId ? 'external' : `prompt:${correctionPrompts(53)[0].id}`,
+      questionText: linkedId ? '' : correctionQuestionText(correctionPrompts(53)[0]),
+      answerText: '',
+      file: null,
+    },
+    54: {
+      source: linkedId ? 'external' : `prompt:${correctionPrompts(54)[0].id}`,
+      questionText: linkedId ? '' : correctionQuestionText(correctionPrompts(54)[0]),
+      answerText: '',
+      file: null,
+    },
+  }))
+  useEffect(() => {
+    if (!linkedId || linkedApplied.current || isInitializing) return
+    linkedApplied.current = true
+    const answer = savedAnswers.find(
+      (item) => item.id === linkedId && [53, 54].includes(item.promptNumber),
+    )
+    if (answer) {
+      setAnswers((current) => ({
+        ...current,
+        [answer.promptNumber]: correctionSavedAnswer(answer),
+      }))
+      if (query.get('product') !== 'bundle') setProduct(`q${answer.promptNumber}`)
+    }
+  }, [linkedId, savedAnswers, isInitializing, query])
+  function selectSource(n, source) {
+    linkedApplied.current = true
+    if (source.startsWith('answer:')) {
+      const answer = savedAnswers.find(
+        (item) => `answer:${item.id}` === source && item.promptNumber === n,
+      )
+      if (answer) setAnswers((current) => ({ ...current, [n]: correctionSavedAnswer(answer) }))
+      return
+    }
+    const prompt = correctionPrompts(n).find((item) => `prompt:${item.id}` === source)
+    setAnswers((current) => ({
+      ...current,
+      [n]: { source, questionText: correctionQuestionText(prompt), answerText: '', file: null },
+    }))
+  }
   const [consent, setConsent] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState('')
@@ -157,25 +205,69 @@ export default function CorrectionPage() {
               />
             </div>
           </fieldset>
+          {linkedId && !isInitializing && !savedAnswers.some((item) => item.id === linkedId) ? (
+            <p role="status">{c.savedUnavailable}</p>
+          ) : null}
           {product.questionNumbers.map((n) => (
             <fieldset disabled={busy} key={n}>
               <legend>TOPIK II {n}</legend>
+              <label className="field">
+                <span className="field-label">
+                  {n} · {c.problemSource}
+                </span>
+                <select
+                  value={answers[n].source}
+                  disabled={Boolean(linkedId && isInitializing)}
+                  onChange={(e) => selectSource(n, e.target.value)}
+                >
+                  <optgroup label={c.serviceProblems}>
+                    {correctionPrompts(n).map((prompt) => (
+                      <option key={prompt.id} value={`prompt:${prompt.id}`}>
+                        {prompt.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {savedAnswers.some((answer) => answer.promptNumber === n) ? (
+                    <optgroup label={c.savedAnswers}>
+                      {savedAnswers
+                        .filter((answer) => answer.promptNumber === n)
+                        .map((answer) => (
+                          <option key={answer.id} value={`answer:${answer.id}`}>
+                            {answer.title} · {answer.promptDate || answer.createdAt?.slice(0, 10)}
+                          </option>
+                        ))}
+                    </optgroup>
+                  ) : null}
+                  <option value="external">{c.externalProblem}</option>
+                </select>
+              </label>
+              <p>{c.problemHint}</p>
+              {answers[n].source.startsWith('answer:') && !answers[n].questionText ? (
+                <p role="status">{c.originalMissing}</p>
+              ) : null}
               <Textarea
                 label={`${n} · ${c.question}`}
                 required
                 maxLength={10000}
                 rows={5}
                 value={answers[n].questionText}
-                onChange={(e) => setAnswer(n, 'questionText', e.target.value)}
+                onChange={(e) => {
+                  linkedApplied.current = true
+                  setAnswer(n, 'questionText', e.target.value)
+                }}
               />
               <Textarea
                 label={`${n} · ${c.answer}`}
                 maxLength={10000}
                 rows={9}
                 value={answers[n].answerText}
-                onChange={(e) => setAnswer(n, 'answerText', e.target.value)}
+                onChange={(e) => {
+                  linkedApplied.current = true
+                  setAnswer(n, 'answerText', e.target.value)
+                }}
               />
               <Input
+                key={answers[n].source}
                 label={`${n} · ${c.image}`}
                 type="file"
                 accept="image/jpeg,image/png"

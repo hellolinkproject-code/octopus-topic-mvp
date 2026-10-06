@@ -59,7 +59,7 @@ export default function AnswerDetailPage() {
           <article>{answer.content}</article>
         </Card>
         {answer.promptNumber === 54 ? <FeedbackPanel key={answer.id} answer={answer} /> : null}
-        <TeacherCta question={answer.promptNumber} />
+        <TeacherCta question={answer.promptNumber} answerId={answer.id} />
         <div className="detail-actions">
           <Button variant="outline" onClick={() => navigate(path('/answers'))}>
             {t('answers.back')}

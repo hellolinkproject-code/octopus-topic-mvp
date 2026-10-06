@@ -1,4 +1,14 @@
 const ko = {
+  originalMissing:
+    '저장된 문제의 원문을 찾을 수 없습니다. 답안을 작성한 원래 문제를 직접 입력해 주세요.',
+  problemSource: '문제 선택',
+  serviceProblems: '서비스 연습 문제',
+  savedAnswers: '내가 저장한 답안',
+  externalProblem: '외부 문제 직접 입력',
+  problemHint:
+    '서비스 문제를 선택하면 문제 설명과 자료가 자동으로 채워집니다. 저장한 답안을 선택하면 원래 문제와 답안이 함께 채워집니다. 내용을 확인한 뒤 수정할 수 있습니다. 문제를 바꾸면 답안 입력이 초기화됩니다.',
+  savedUnavailable:
+    '선택한 답안을 불러오지 못했습니다. 답안을 저장한 계정으로 로그인하거나, 아래에서 문제를 선택하고 답안을 입력해 주세요.',
   apply: '한국어 선생님 첨삭 신청하기',
   practice: '무료 AI 쓰기 연습',
   subtitle: 'AI로 먼저 연습하고, 한국어 선생님에게 제대로 첨삭받으세요.',
@@ -117,6 +127,16 @@ const ko = {
   neutral: '매일 쓰고, 피드백을 확인하고, 다시 연습해 보세요.',
 }
 const en = {
+  originalMissing:
+    'The original problem is unavailable. Please enter the exact problem you answered.',
+  problemSource: 'Choose a problem',
+  serviceProblems: 'Service practice problems',
+  savedAnswers: 'My saved answers',
+  externalProblem: 'Enter an external problem',
+  problemHint:
+    'Select a service problem to fill its instructions and data. Select a saved answer to fill its original problem and answer. Review and edit before submitting. Changing the problem resets the answer.',
+  savedUnavailable:
+    'The selected answer could not be loaded. Sign in with the account that saved it, or choose a problem and enter your answer below.',
   apply: 'Request teacher correction',
   practice: 'Free AI writing practice',
   subtitle: 'Practice with AI. Improve with a Korean teacher.',

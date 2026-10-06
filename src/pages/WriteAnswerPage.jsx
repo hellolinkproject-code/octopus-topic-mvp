@@ -305,7 +305,7 @@ function WritingEditor({ number }) {
             </div>
           </section>
         ) : null}
-        {savedAnswer ? <TeacherCta question={number} /> : null}
+        {savedAnswer ? <TeacherCta question={number} answerId={savedAnswer.id} /> : null}
       </main>
     </Layout>
   )

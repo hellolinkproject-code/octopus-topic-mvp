@@ -27,13 +27,16 @@ export function ProductCards() {
     </div>
   )
 }
-export function TeacherCta({ question = 54 }) {
+export function TeacherCta({ question = 54, answerId }) {
   const { language, path } = useLanguage(),
     c = correctionCopy(language)
   return (
     <aside className="teacher-cta">
       <p>{c.teacherCta}</p>
-      <Link className="button button-outline" to={`${path('/correction')}?question=${question}`}>
+      <Link
+        className="button button-outline"
+        to={`${path('/correction')}?question=${question}${answerId ? `&answerId=${encodeURIComponent(answerId)}` : ''}`}
+      >
         {c.teacherLink}
       </Link>
     </aside>

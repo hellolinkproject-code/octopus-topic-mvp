@@ -80,3 +80,71 @@ it('shows only administrator authentication before a token exists', async () => 
   expect(await screen.findByLabelText('관리자 Secret')).toBeTruthy()
   expect(screen.queryByText('주문 필터')).toBeNull()
 })
+
+it('provides service problem data and supports an external problem', async () => {
+  show('/ko/correction?question=53')
+  const question = await screen.findByLabelText('53 · 문제 내용 또는 문제 설명')
+  expect(question.value).toContain('2020년: 74')
+  expect(question.value).toContain('60대')
+  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), {
+    target: { value: 'prompt:transport' },
+  })
+  expect(question.value).toContain('편리성: 2021년: 62')
+  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), { target: { value: 'external' } })
+  expect(question.value).toBe('')
+  fireEvent.change(question, { target: { value: '외부 문제 원문' } })
+  expect(question.value).toBe('외부 문제 원문')
+})
+
+it('restores the linked answer and its exact original problem after async session loading', async () => {
+  localStorage.setItem(ACCESS_TOKEN_KEY, 'test-token')
+  let restore
+  fetch.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        restore = resolve
+      }),
+  )
+  show('/ko/correction?question=53&answerId=saved-original')
+  expect(screen.getByLabelText('53 · 문제 내용 또는 문제 설명').value).toBe('')
+  restore(
+    new Response(
+      JSON.stringify({
+        state: {
+          user: { id: 'user-1', name: 'Test' },
+          points: 0,
+          completedQuizIds: [],
+          answers: [
+            {
+              id: 'saved-original',
+              promptNumber: 53,
+              promptId: 'transport',
+              title: '대중교통 만족도 변화',
+              promptDate: '2025-01-01',
+              content: '내가 작성한 원래 답안',
+              createdAt: '2025-01-01T00:00:00Z',
+            },
+          ],
+        },
+      }),
+      { status: 200 },
+    ),
+  )
+  await waitFor(() =>
+    expect(screen.getByLabelText('53 · 답안 직접 입력').value).toBe('내가 작성한 원래 답안'),
+  )
+  expect(screen.getByLabelText('53 · 문제 내용 또는 문제 설명').value).toContain(
+    '대중교통 만족도 변화',
+  )
+  expect(screen.getByLabelText('53 · 문제 내용 또는 문제 설명').value).toContain(
+    '쾌적성: 2021년: 48, 2025년: 71',
+  )
+  expect(screen.getByLabelText('53 · 문제 선택').value).toBe('answer:saved-original')
+})
+
+it('does not substitute a different service problem when the linked answer is unavailable', async () => {
+  show('/ko/correction?answerId=someone-elses-answer')
+  expect((await screen.findByRole('status')).textContent).toContain('불러오지 못했습니다')
+  expect(screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value).toBe('')
+  expect(screen.getByLabelText('54 · 답안 직접 입력').value).toBe('')
+})
