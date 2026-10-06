@@ -81,8 +81,8 @@ describe('Teacher correction requests', () => {
   })
   it.each([
     ['q53', 19900],
-    ['q54', 29900],
-    ['bundle', 39900],
+    ['q54', 49900],
+    ['bundle', 59900],
   ])('sets server price for %s and ignores forged price/status', async (product, amount) => {
     const res = await call(customerApi, 'POST', {
       ...payload(product),

@@ -11,14 +11,14 @@ export const CORRECTION_PRODUCTS = {
     questionNumbers: [54],
     name: 'TOPIK 54번 첨삭',
     nameEn: 'TOPIK Question 54 correction',
-    price: 29900,
+    price: 49900,
   },
   bundle: {
     id: 'bundle',
     questionNumbers: [53, 54],
     name: 'TOPIK 53·54번 세트',
     nameEn: 'TOPIK Questions 53 + 54 bundle',
-    price: 39900,
+    price: 59900,
   },
 }
 export const CORRECTION_STATUS = {
