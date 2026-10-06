@@ -70,16 +70,16 @@ export default async function handler(request, response) {
     const date = new Date(`${parsed.data.promptDate}T00:00:00Z`)
     const day = Math.floor(date.getTime() / 86400000)
     const today = Math.floor((Date.now() + 9 * 3600000) / 86400000)
+    const isExisting = user.answers.some((item) => isSamePrompt(parsed.data, item, idempotencyKey))
     if (
       !prompt ||
       !Number.isFinite(day) ||
       !/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.promptDate) ||
       date.toISOString().slice(0, 10) !== parsed.data.promptDate ||
-      bank[day % bank.length]?.id !== prompt.id
+      (!isExisting && bank[day % bank.length]?.id !== prompt.id)
     ) {
       return sendError(response, 400, 'PROMPT_INVALID', '올바른 쓰기 문제를 선택해 주세요.')
     }
-    const isExisting = user.answers.some((item) => isSamePrompt(parsed.data, item, idempotencyKey))
     if (!isExisting && (day < today - 1 || day > today + 1))
       return sendError(
         response,

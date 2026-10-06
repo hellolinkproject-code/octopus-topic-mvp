@@ -6,6 +6,7 @@ import quizAttemptsHandler from '../api/quiz-attempts.js'
 import { createAccessToken } from '../api/_lib/auth.js'
 import { getOfficialDailyQuiz } from '../api/_lib/officialQuiz.js'
 import { getDailyWritingPrompt } from '../src/lib/dailyContent.js'
+import { updateUser } from '../api/_lib/store.js'
 
 const NOW = new Date('2026-09-02T15:00:00.000Z')
 const QUIZ_ID = 'daily-quiz-2026-09-03'
@@ -205,5 +206,27 @@ describe('Mission 7 API contracts', () => {
     expect(saved.body.awarded).toBe(true)
     expect(saved.body.state.points).toBe(before.body.state.points + 30)
     expect(saved.body.state.answers).toHaveLength(before.body.state.answers.length + 1)
+  })
+  it('keeps retries of a previously saved essay valid after expanding the daily bank', async () => {
+    const payload = {
+      title: '이전 저장 답안',
+      promptNumber: 54,
+      promptId: 'digital-literacy',
+      promptDate: '2025-01-01',
+      content: '가'.repeat(600),
+    }
+    await updateUser(userId, (current) => ({
+      ...current,
+      answers: [
+        ...current.answers,
+        { ...payload, id: 'legacy-essay', earnedPoints: 0, createdAt: '2025-01-01T00:00:00Z' },
+      ],
+    }))
+    const before = await call(meHandler, request('GET', undefined, token))
+    const retry = await call(answersHandler, request('POST', payload, token))
+    expect(retry.statusCode).toBe(200)
+    expect(retry.body.answer.id).toBe('legacy-essay')
+    expect(retry.body.state.answers).toHaveLength(before.body.state.answers.length)
+    expect(retry.body.state.points).toBe(before.body.state.points)
   })
 })

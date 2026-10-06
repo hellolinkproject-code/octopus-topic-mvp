@@ -65,6 +65,13 @@ describe('daily problem bank selection', () => {
     expect(today.maxCharacters).toBe(700)
     expect(today.questions).toHaveLength(3)
     expect(tomorrow.id).not.toBe(today.id)
-    expect(essayPromptBank).toHaveLength(6)
+    expect(essayPromptBank).toHaveLength(20)
+    expect(new Set(essayPromptBank.map((prompt) => prompt.id)).size).toBe(20)
+    for (const prompt of essayPromptBank) {
+      expect(prompt.questions).toHaveLength(3)
+      expect(prompt.outline).toHaveLength(3)
+      expect(prompt.minCharacters).toBe(600)
+      expect(prompt.maxCharacters).toBe(700)
+    }
   })
 })

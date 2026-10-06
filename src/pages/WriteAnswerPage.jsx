@@ -1,3 +1,4 @@
+import GraphQuestion from '../components/GraphQuestion'
 import { TeacherCta } from '../components/CorrectionShared'
 import {
   ArrowLeft,
@@ -109,44 +110,7 @@ function WritingEditor({ number }) {
           {!isEssay ? (
             <Card className="prompt-card">
               <span className="prompt-label">{t('writing.graph')}</span>
-              <h2>{writingPrompt.title}</h2>
-              <p>{writingPrompt.description}</p>
-              <div className="graph-legend">
-                {writingPrompt.series.map((item) => (
-                  <span key={item.key}>
-                    <i style={{ background: item.color }} />
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-              <div
-                className="writing-chart"
-                role="img"
-                aria-label={`${writingPrompt.title}. ${writingPrompt.description}`}
-              >
-                {writingPrompt.chartData.map((group) => (
-                  <div className="writing-chart-group" key={group.label}>
-                    <div className="writing-bars">
-                      {group.values.map((item) => {
-                        const seriesItem = writingPrompt.series.find(
-                          (series) => series.key === item.series,
-                        )
-                        return (
-                          <div className="writing-bar-wrap" key={item.series}>
-                            <b>{item.value}%</b>
-                            <span
-                              className="writing-bar"
-                              style={{ height: `${item.value}%`, background: seriesItem.color }}
-                            />
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <strong>{group.label}</strong>
-                  </div>
-                ))}
-              </div>
-              <small className="chart-source">{writingPrompt.source}</small>
+              <GraphQuestion prompt={writingPrompt} />
               <ol>
                 {writingPrompt.questions.map((q) => (
                   <li key={q}>{q}</li>

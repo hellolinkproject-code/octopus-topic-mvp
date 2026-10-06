@@ -1,3 +1,4 @@
+import GraphQuestion from '../components/GraphQuestion'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Layout from '../components/Layout'
@@ -84,6 +85,13 @@ export default function CorrectionPage() {
   const attempt = useRef(null),
     submitting = useRef(false)
   const product = CORRECTION_PRODUCTS[productId]
+  const graphSource = answers[53].source
+  const graphPromptId = graphSource.startsWith('answer:')
+    ? savedAnswers.find((answer) => `answer:${answer.id}` === graphSource)?.promptId
+    : graphSource.startsWith('prompt:')
+      ? graphSource.slice(7)
+      : null
+  const graphPrompt = correctionPrompts(53).find((prompt) => prompt.id === graphPromptId)
   const setAnswer = (n, key, value) =>
     setAnswers((current) => ({ ...current, [n]: { ...current[n], [key]: value } }))
   async function submit(event) {
@@ -242,6 +250,12 @@ export default function CorrectionPage() {
                 </select>
               </label>
               <p>{c.problemHint}</p>
+              {n === 53 && graphPrompt ? (
+                <>
+                  <GraphQuestion prompt={graphPrompt} />
+                  <p>{c.graphSourceNote}</p>
+                </>
+              ) : null}
               {answers[n].source.startsWith('answer:') && !answers[n].questionText ? (
                 <p role="status">{c.originalMissing}</p>
               ) : null}

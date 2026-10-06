@@ -148,3 +148,30 @@ it('does not substitute a different service problem when the linked answer is un
   expect(screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value).toBe('')
   expect(screen.getByLabelText('54 · 답안 직접 입력').value).toBe('')
 })
+
+it('renders the selected 53 graph and hides it for an external problem', async () => {
+  show('/ko/correction?question=53')
+  const graph = await screen.findByRole('img', {
+    name: /연령대별 온라인 쇼핑 이용률 변화.*20대: 2020년 74%/,
+  })
+  expect(graph.querySelectorAll('.exam-graph-bar')).toHaveLength(6)
+  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), {
+    target: { value: 'prompt:transport' },
+  })
+  expect(
+    screen.getByRole('img', { name: /대중교통 만족도 변화.*쾌적성: 2021년 48%, 2025년 71%/ }),
+  ).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('53 · 문제 선택'), { target: { value: 'external' } })
+  expect(document.querySelector('.exam-graph')).toBeNull()
+})
+
+it('offers all 20 original essay problems with their task questions', async () => {
+  show('/ko/correction')
+  const source = await screen.findByLabelText('54 · 문제 선택')
+  expect(source.querySelectorAll('optgroup[label="서비스 연습 문제"] option')).toHaveLength(20)
+  fireEvent.change(source, { target: { value: 'prompt:ai-human-role' } })
+  const problem = screen.getByLabelText('54 · 문제 내용 또는 문제 설명').value
+  expect(problem).toContain('인공지능 시대의 인간 역할')
+  expect(problem).toContain('개인과 사회는 무엇을 준비해야 하는가?')
+  expect(problem).toContain('600~700자')
+})

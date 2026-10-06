@@ -1,4 +1,6 @@
 const ko = {
+  graphSourceNote:
+    '그래프는 선택한 서비스 문제의 자료입니다. 다른 그래프를 사용하려면 외부 문제 직접 입력을 선택해 주세요.',
   originalMissing:
     '저장된 문제의 원문을 찾을 수 없습니다. 답안을 작성한 원래 문제를 직접 입력해 주세요.',
   problemSource: '문제 선택',
@@ -127,6 +129,8 @@ const ko = {
   neutral: '매일 쓰고, 피드백을 확인하고, 다시 연습해 보세요.',
 }
 const en = {
+  graphSourceNote:
+    'This graph shows the selected service problem. To use a different graph, choose Enter an external problem.',
   originalMissing:
     'The original problem is unavailable. Please enter the exact problem you answered.',
   problemSource: 'Choose a problem',
